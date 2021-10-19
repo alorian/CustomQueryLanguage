@@ -23,6 +23,9 @@
     "doctrine/common": {
         "version": "3.1.2"
     },
+    "doctrine/data-fixtures": {
+        "version": "1.5.1"
+    },
     "doctrine/dbal": {
         "version": "3.1.3"
     },
@@ -43,6 +46,18 @@
             "config/packages/prod/doctrine.yaml",
             "src/Repository/.gitignore",
             "src/Entity/.gitignore"
+        ]
+    },
+    "doctrine/doctrine-fixtures-bundle": {
+        "version": "3.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "3.0",
+            "ref": "e5b542d4ef47d8a003c91beb35650c76907f7e53"
+        },
+        "files": [
+            "src/DataFixtures/AppFixtures.php"
         ]
     },
     "doctrine/doctrine-migrations-bundle": {
@@ -118,6 +133,9 @@
     "phpspec/prophecy": {
         "version": "1.14.0"
     },
+    "phpstan/phpstan": {
+        "version": "0.12.99"
+    },
     "phpunit/php-code-coverage": {
         "version": "9.2.7"
     },
@@ -161,6 +179,9 @@
     },
     "psr/log": {
         "version": "2.0.0"
+    },
+    "rector/rector": {
+        "version": "0.11.58"
     },
     "sebastian/cli-parser": {
         "version": "1.0.1"
