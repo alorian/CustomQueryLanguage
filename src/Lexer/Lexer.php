@@ -2,8 +2,8 @@
 
 namespace App\Lexer;
 
-use App\Exception\UnexpectedCharacterException;
-use App\Exception\UnterminatedStringException;
+use App\Exception\LexerUnexpectedCharacterException;
+use App\Exception\LexerUnterminatedStringException;
 use App\Lexer\KeywordToken\NotToken;
 use App\Lexer\SimpleToken\CommaToken;
 use App\Lexer\DateToken\CurrentDateModifierToken;
@@ -15,6 +15,7 @@ use App\Lexer\SimpleToken\LessEqualToken;
 use App\Lexer\SimpleToken\LessToken;
 use App\Lexer\SimpleToken\MinusToken;
 use App\Lexer\SimpleToken\NotEqualToken;
+use App\Lexer\TypeToken\EolToken;
 use App\Lexer\TypeToken\NumberToken;
 use App\Lexer\SimpleToken\ParenLeftToken;
 use App\Lexer\SimpleToken\ParenRightToken;
@@ -22,6 +23,7 @@ use App\Lexer\SimpleToken\PlusToken;
 use App\Lexer\SimpleToken\StarToken;
 use App\Lexer\TypeToken\StringToken;
 use App\Lexer\SimpleToken\TildaToken;
+use JetBrains\PhpStorm\Pure;
 
 class Lexer
 {
@@ -49,8 +51,8 @@ class Lexer
     ];
 
     /**
-     * @throws UnterminatedStringException
-     * @throws UnexpectedCharacterException
+     * @throws LexerUnterminatedStringException
+     * @throws LexerUnexpectedCharacterException
      */
     public function analyze(string $code): array
     {
@@ -63,13 +65,14 @@ class Lexer
             $this->lexemeStartPos = $this->currentPos;
             $this->scanToken();
         }
+        $this->addToken(EolToken::class);
 
         return $this->tokensList;
     }
 
     /**
-     * @throws UnterminatedStringException
-     * @throws UnexpectedCharacterException
+     * @throws LexerUnterminatedStringException
+     * @throws LexerUnexpectedCharacterException
      */
     protected function scanToken(): void
     {
@@ -142,7 +145,7 @@ class Lexer
                 } elseif ($this->isAlpha($char)) {
                     $this->identifier();
                 } else {
-                    throw new UnexpectedCharacterException('Unexpected character: ' . $char . ' at ' . $this->currentPos);
+                    throw new LexerUnexpectedCharacterException($char, $this->currentPos);
                 }
         }
     }
@@ -183,7 +186,7 @@ class Lexer
     }
 
     /**
-     * @throws UnexpectedCharacterException
+     * @throws LexerUnexpectedCharacterException
      */
     protected function number(): void
     {
@@ -202,7 +205,7 @@ class Lexer
                 $this->advance();
                 $this->addToken(CurrentDateModifierToken::class);
             } else {
-                throw new UnexpectedCharacterException('Unexpected character: ' . $this->nextSymbol() . ' at ' . $this->currentPos);
+                throw new LexerUnexpectedCharacterException($this->nextSymbol(), $this->currentPos);
             }
         } else {
             // integer
@@ -211,7 +214,7 @@ class Lexer
     }
 
     /**
-     * @throws UnterminatedStringException
+     * @throws LexerUnterminatedStringException
      */
     protected function string(string $terminator): void
     {
@@ -228,7 +231,7 @@ class Lexer
         }
 
         if ($this->isAtEnd()) {
-            throw new UnterminatedStringException('String started at: ' . $this->lexemeStartPos);
+            throw new LexerUnterminatedStringException($this->lexemeStartPos);
         }
 
         $this->advance();// adding terminator symbol
@@ -258,12 +261,12 @@ class Lexer
         return $this->currentPos >= strlen($this->code);
     }
 
-    protected function addToken(string $tokenClass, string $literal = null): void
+    protected function addToken(string $tokenClass, string $value = null): void
     {
-        if ($literal === null) {
-            $literal = substr($this->code, $this->lexemeStartPos, ($this->currentPos - $this->lexemeStartPos));
+        if ($value === null) {
+            $value = substr($this->code, $this->lexemeStartPos, ($this->currentPos - $this->lexemeStartPos));
         }
-        $this->tokensList[] = new $tokenClass($literal, $this->lexemeStartPos);
+        $this->tokensList[] = new $tokenClass($value, $this->lexemeStartPos);
     }
 
     protected function isDigit(?string $char): bool
@@ -274,7 +277,7 @@ class Lexer
         return $char >= '0' && $char <= '9';
     }
 
-    private function isAlpha(?string $char): bool
+    protected function isAlpha(?string $char): bool
     {
         if ($char === null) {
             return false;
@@ -282,7 +285,8 @@ class Lexer
         return ($char >= 'a' && $char <= 'z') || ($char >= 'A' && $char <= 'Z') || $char === '_';
     }
 
-    private function isAlphaNumeric(?string $char): bool
+    #[Pure]
+    protected function isAlphaNumeric(?string $char): bool
     {
         if ($char === null) {
             return false;

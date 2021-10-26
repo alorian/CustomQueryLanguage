@@ -2,8 +2,8 @@
 
 namespace App\Tests\Lexer;
 
-use App\Exception\UnexpectedCharacterException;
-use App\Exception\UnterminatedStringException;
+use App\Exception\LexerUnexpectedCharacterException;
+use App\Exception\LexerUnterminatedStringException;
 use App\Lexer\DateToken\CurrentDateModifierToken;
 use App\Lexer\KeywordToken\AndToken;
 use App\Lexer\KeywordToken\ByToken;
@@ -28,6 +28,7 @@ use App\Lexer\SimpleToken\PlusToken;
 use App\Lexer\SimpleToken\StarToken;
 use App\Lexer\SimpleToken\TildaToken;
 use App\Lexer\TypeToken\EmptyToken;
+use App\Lexer\TypeToken\EolToken;
 use App\Lexer\TypeToken\FalseToken;
 use App\Lexer\TypeToken\NullToken;
 use App\Lexer\TypeToken\NumberToken;
@@ -48,18 +49,28 @@ class LexerTest extends KernelTestCase
     public function testEmptyString(): void
     {
         $tokensList = $this->lexer->analyze('');
+        $lastToken = array_pop($tokensList);
+        $this->assertInstanceOf(EolToken::class, $lastToken);
         $this->assertEmpty($tokensList);
 
         $tokensList = $this->lexer->analyze(' ');
+        $lastToken = array_pop($tokensList);
+        $this->assertInstanceOf(EolToken::class, $lastToken);
         $this->assertEmpty($tokensList);
 
         $tokensList = $this->lexer->analyze("\r");
+        $lastToken = array_pop($tokensList);
+        $this->assertInstanceOf(EolToken::class, $lastToken);
         $this->assertEmpty($tokensList);
 
         $tokensList = $this->lexer->analyze("\t");
+        $lastToken = array_pop($tokensList);
+        $this->assertInstanceOf(EolToken::class, $lastToken);
         $this->assertEmpty($tokensList);
 
         $tokensList = $this->lexer->analyze("\n");
+        $lastToken = array_pop($tokensList);
+        $this->assertInstanceOf(EolToken::class, $lastToken);
         $this->assertEmpty($tokensList);
     }
 
@@ -77,7 +88,7 @@ class LexerTest extends KernelTestCase
      */
     public function testUnknownSymbolsException(string $stringWithUnknownSymbol): void
     {
-        $this->expectException(UnexpectedCharacterException::class);
+        $this->expectException(LexerUnexpectedCharacterException::class);
         $this->lexer->analyze($stringWithUnknownSymbol);
     }
 
@@ -95,7 +106,7 @@ class LexerTest extends KernelTestCase
      */
     public function testUnterminatedStringException(string $unterminatedString): void
     {
-        $this->expectException(UnterminatedStringException::class);
+        $this->expectException(LexerUnterminatedStringException::class);
         $this->lexer->analyze($unterminatedString);
     }
 
@@ -177,6 +188,8 @@ class LexerTest extends KernelTestCase
     public function testSingleTypeTokens(string $lexeme, string $className): void
     {
         $tokensList = $this->lexer->analyze($lexeme);
+        $lastToken = array_pop($tokensList);
+        $this->assertInstanceOf(EolToken::class, $lastToken);
         $this->assertContainsOnlyInstancesOf($className, $tokensList);
     }
 
@@ -184,6 +197,8 @@ class LexerTest extends KernelTestCase
     {
         $code = '(status=resolved AND project=SysAdmin) OR assignee=bobsmith and 7d';
         $tokensList = $this->lexer->analyze($code);
+        $lastToken = array_pop($tokensList);
+        $this->assertInstanceOf(EolToken::class, $lastToken);
         $this->assertCount(15, $tokensList);
     }
 

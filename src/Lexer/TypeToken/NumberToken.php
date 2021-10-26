@@ -7,13 +7,18 @@ use App\Lexer\AbstractToken;
 class NumberToken extends AbstractToken
 {
 
-    public const LEXEME = '';
+    public const LEXEME = 'NUMBER';
 
     public function __construct(
-        public ?string $literal = null,
+        public ?string $value = null,
         public ?int $pos = null,
     ){
-        parent::__construct($literal, $pos);
-        $this->literal = (float)$this->literal;
+        parent::__construct($value, $pos);
+        $this->value = (float)$this->value;
+    }
+
+    public function negate(): void
+    {
+        $this->value = -$this->value;
     }
 }
