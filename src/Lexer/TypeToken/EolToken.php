@@ -7,6 +7,6 @@ use App\Lexer\AbstractToken;
 class EolToken extends AbstractToken
 {
 
-    public const LEXEME = null;
+    public const LEXEME = 'EoL';
 
 }

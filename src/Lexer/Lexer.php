@@ -65,7 +65,7 @@ class Lexer
             $this->lexemeStartPos = $this->currentPos;
             $this->scanToken();
         }
-        $this->addToken(EolToken::class);
+        $this->addToken(EolToken::class, '');
 
         return $this->tokensList;
     }
