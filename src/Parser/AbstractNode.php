@@ -3,6 +3,7 @@
 namespace App\Parser;
 
 use App\Lexer\AbstractToken;
+use App\Transpiler\VisitorInterface;
 
 class AbstractNode
 {
@@ -21,6 +22,11 @@ class AbstractNode
     public function unshift(AbstractToken|AbstractNode $node): void
     {
         array_unshift($this->children, $node);
+    }
+
+    public function accept(VisitorInterface $visitor)
+    {
+        return $visitor->visit($this);
     }
 
 }

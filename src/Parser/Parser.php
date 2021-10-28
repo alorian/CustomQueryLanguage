@@ -30,7 +30,7 @@ class Parser
     /**
      * @throws ParserUnexpectedTokenException
      */
-    public function parse(array $tokensList): ?QueryNode
+    public function parse(array $tokensList): QueryNode
     {
         $this->currentPos = 0;
         $this->tokensList = $tokensList;
