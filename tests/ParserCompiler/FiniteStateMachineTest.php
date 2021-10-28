@@ -9,6 +9,8 @@ use App\Parser\Node\ConditionalExpressionNode;
 use App\Parser\Node\ConditionalFactorNode;
 use App\Parser\Node\ConditionalPrimaryNode;
 use App\Parser\Node\ConditionalTermNode;
+use App\Parser\Node\ContainsExpressionNode;
+use App\Parser\Node\ContainsOperatorNode;
 use App\Parser\Node\FieldNode;
 use App\Parser\Node\PrimaryNode;
 use App\Parser\Node\QueryNode;
@@ -36,6 +38,8 @@ class FiniteStateMachineTest extends KernelTestCase
             SimpleCondExpressionNode::class,
             ComparisonExpressionNode::class,
             ComparisonOperatorNode::class,
+            ContainsExpressionNode::class,
+            ContainsOperatorNode::class,
             PrimaryNode::class,
             FieldNode::class,
         ];

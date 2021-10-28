@@ -7,6 +7,11 @@ use App\Lexer\KeywordToken\AndToken;
 use App\Lexer\KeywordToken\OrToken;
 use App\Lexer\Lexer;
 use App\Lexer\SimpleToken\EqualToken;
+use App\Lexer\SimpleToken\GreaterEqualToken;
+use App\Lexer\SimpleToken\GreaterToken;
+use App\Lexer\SimpleToken\LessEqualToken;
+use App\Lexer\SimpleToken\LessToken;
+use App\Lexer\SimpleToken\NotEqualToken;
 use App\Lexer\SimpleToken\ParenLeftToken;
 use App\Lexer\SimpleToken\ParenRightToken;
 use App\Lexer\TypeToken\StringToken;
@@ -16,6 +21,8 @@ use App\Parser\Node\ConditionalExpressionNode;
 use App\Parser\Node\ConditionalFactorNode;
 use App\Parser\Node\ConditionalPrimaryNode;
 use App\Parser\Node\ConditionalTermNode;
+use App\Parser\Node\ContainsExpressionNode;
+use App\Parser\Node\ContainsOperatorNode;
 use App\Parser\Node\FieldNode;
 use App\Parser\Node\PrimaryNode;
 use App\Parser\Node\QueryNode;
@@ -161,6 +168,61 @@ class ParserTest extends KernelTestCase
         $this->assertInstanceOf(ParenLeftToken::class, $node->children[0]);
         $this->assertInstanceOf(ConditionalExpressionNode::class, $node->children[1]);
         $this->assertInstanceOf(ParenRightToken::class, $node->children[2]);
+    }
+
+
+
+    public function comparisonExpressionsProvider(): array
+    {
+        $dataSets = [];
+
+        $operators = [
+            EqualToken::class,
+            NotEqualToken::class,
+            LessToken::class,
+            LessEqualToken::class,
+            GreaterToken::class,
+            GreaterEqualToken::class,
+        ];
+        foreach ($operators as $opClassName) {
+            $dataSets[] = ['name ' . $opClassName::LEXEME . ' test'];
+        }
+
+        return $dataSets;
+    }
+
+    /**
+     * @dataProvider comparisonExpressionsProvider
+     */
+    public function testComparisonExpression(string $query)
+    {
+        $tokensList = static::$lexer->analyze($query);
+        $node = static::$parser->parse($tokensList);
+
+        while (!$node instanceof ComparisonExpressionNode && !empty($node->children)) {
+            $node = reset($node->children);
+        }
+
+        $this->assertInstanceOf(ComparisonExpressionNode::class, $node);
+        $this->assertInstanceOf(FieldNode::class, $node->children[0]);
+        $this->assertInstanceOf(ComparisonOperatorNode::class, $node->children[1]);
+        $this->assertInstanceOf(PrimaryNode::class, $node->children[2]);
+    }
+
+    public function testContainsExpression()
+    {
+        $query = 'name ~ test';
+        $tokensList = static::$lexer->analyze($query);
+        $node = static::$parser->parse($tokensList);
+
+        while (!$node instanceof ContainsExpressionNode && !empty($node->children)) {
+            $node = reset($node->children);
+        }
+
+        $this->assertInstanceOf(ContainsExpressionNode::class, $node);
+        $this->assertInstanceOf(FieldNode::class, $node->children[0]);
+        $this->assertInstanceOf(ContainsOperatorNode::class, $node->children[1]);
+        $this->assertInstanceOf(PrimaryNode::class, $node->children[2]);
     }
 
 }

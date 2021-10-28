@@ -10,6 +10,9 @@ class SimpleCondExpressionNode extends AbstractNode
     public const RULES = [
         [
             ComparisonExpressionNode::class
+        ],
+        [
+            ContainsExpressionNode::class
         ]
     ];
 
