@@ -13,7 +13,7 @@ class LexerUnterminatedStringException extends Exception
      * @param Throwable|null $previous
      */
     public function __construct(
-        protected int $stringStartPos,
+        public int $stringStartPos,
         Throwable $previous = null
     ) {
         parent::__construct('String started at: ' . $this->stringStartPos, 0, $previous);

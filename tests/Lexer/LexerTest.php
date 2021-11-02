@@ -40,7 +40,7 @@ class LexerTest extends KernelTestCase
 {
     protected Lexer $lexer;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         self::bootKernel();
         $this->lexer = self::getContainer()->get(Lexer::class);

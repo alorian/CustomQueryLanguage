@@ -2,6 +2,7 @@
 
 namespace App\Transpiler;
 
+use App\Exception\TranspilerUnknownFieldException;
 use App\Lexer\AbstractToken;
 use App\Lexer\SimpleToken\ParenLeftToken;
 use App\Parser\AbstractNode;
@@ -21,6 +22,14 @@ use App\Parser\Node\SimpleCondExpressionNode;
 class SqlVisitor implements VisitorInterface
 {
 
+    public function __construct(
+        protected FieldsBag $fieldsBag
+    ) {
+    }
+
+    /**
+     * @throws TranspilerUnknownFieldException
+     */
     public function visit(AbstractNode $node): string
     {
         return match ($node::class) {
@@ -44,8 +53,13 @@ class SqlVisitor implements VisitorInterface
     {
         $sqlParts = [];
 
-        foreach ($node->children as $child) {
-            $sqlParts[] = $child->accept($this);
+        if (!empty($node->children)) {
+            if ($node->children[0] instanceof ConditionalExpressionNode) {
+                $sqlParts[] = 'WHERE';
+            }
+            foreach ($node->children as $child) {
+                $sqlParts[] = $child->accept($this);
+            }
         }
 
         return implode(' ', $sqlParts);
@@ -125,25 +139,26 @@ class SqlVisitor implements VisitorInterface
 
     protected function visitComparisonExpressionNode(AbstractNode $node): string
     {
-        $queryPart = '';
+        $queryParts = [];
         foreach ($node->children as $child) {
-            $queryPart .= $child->accept($this);
+            $queryParts[] = $child->accept($this);
         }
-        return $queryPart;
+        return implode(' ', $queryParts);
     }
 
     protected function visitContainsExpressionNode(AbstractNode $node): string
     {
-        $queryPart = '';
+        $queryParts = [];
         foreach ($node->children as $child) {
-            $queryPart .= $child->accept($this);
+            $queryParts[] = $child->accept($this);
         }
-        return $queryPart;
+        return implode(' ', $queryParts);
     }
 
     protected function visitContainsOperatorNode(AbstractNode $node): string
     {
-        return $node->children[0]::LEXEME;
+        //return $node->children[0]::LEXEME;
+        return 'like';
     }
 
     protected function visitComparisonOperatorNode(AbstractNode $node): string
@@ -156,9 +171,17 @@ class SqlVisitor implements VisitorInterface
         return "'" . $node->children[0]->value . "'";
     }
 
+    /**
+     * @throws TranspilerUnknownFieldException
+     */
     protected function visitFieldNode(AbstractNode $node): string
     {
-        return $node->children[0]->value;
+        $fieldName = strtolower($node->children[0]->value);
+        if ($this->fieldsBag->fieldExists($fieldName)) {
+            return $fieldName;
+        }
+
+        throw new TranspilerUnknownFieldException($node->children[0]);
     }
 
 }

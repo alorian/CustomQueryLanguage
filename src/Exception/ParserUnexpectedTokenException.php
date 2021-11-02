@@ -3,6 +3,7 @@
 namespace App\Exception;
 
 use App\Lexer\AbstractToken;
+use App\Lexer\TypeToken\EolToken;
 use App\ParserCompiler\Operation\OperationError;
 use Exception;
 use JetBrains\PhpStorm\Pure;
@@ -17,25 +18,27 @@ class ParserUnexpectedTokenException extends Exception
      */
     #[Pure]
     public function __construct(
-        protected OperationError $operationError,
-        protected ?AbstractToken $currentToken = null,
+        public OperationError $operationError,
+        public ?AbstractToken $currentToken = null,
         Throwable $previous = null
     ) {
-        if ($this->currentToken !== null) {
+        if ($this->currentToken === null || $this->currentToken instanceof EolToken) {
+            $message = 'Unexpected end of line';
+        } else {
             $message = 'Unexpected token "' . $this->currentToken->value . '" ';
             $message .= "[" . $this->currentToken::LEXEME . "]";
             $message .= ' at ' . $this->currentToken->pos;
-        } else {
-            $message = 'Unexpected end of string';
         }
 
         if (!empty($operationError->expectedTokensList)) {
             $message .= '. Expected ';
             $types = [];
             foreach ($this->operationError->expectedTokensList as $className) {
-                $types[] = '"' . $className::LEXEME . '"';
+                if (is_subclass_of($className, AbstractToken::class)) {
+                    $types[] = '"' . $className::LEXEME . '"';
+                }
             }
-            $message .= ' on of the ' . implode(', ', $types) . ' tokens';
+            $message .= ' one of the ' . implode(', ', $types) . ' tokens';
         }
 
         parent::__construct($message, 0, $previous);

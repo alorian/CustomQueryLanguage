@@ -32,15 +32,23 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class ParserTest extends KernelTestCase
 {
-    protected static Lexer $lexer;
+    protected static ?Lexer $lexer;
 
-    protected static Parser $parser;
+    protected static ?Parser $parser;
 
     public static function setUpBeforeClass(): void
     {
+        parent::setUpBeforeClass();
         self::bootKernel();
         static::$parser = self::getContainer()->get(Parser::class);
         static::$lexer = self::getContainer()->get(Lexer::class);
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        parent::tearDownAfterClass();
+        static::$parser = null;
+        static::$lexer = null;
     }
 
     public function unknownTokenProvider(): array

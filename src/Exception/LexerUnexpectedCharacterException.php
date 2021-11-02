@@ -12,8 +12,8 @@ class LexerUnexpectedCharacterException extends \Exception
      * @param Throwable|null $previous
      */
     public function __construct(
-        protected string $char,
-        protected int $charPos,
+        public string $char,
+        public int $charPos,
         Throwable $previous = null
     ) {
         parent::__construct('Unexpected character "' . $this->char . '" at: ' . $this->charPos, 0, $previous);

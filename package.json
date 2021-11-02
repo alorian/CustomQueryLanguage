@@ -1,0 +1,38 @@
+{
+    "devDependencies": {
+        "@symfony/stimulus-bridge": "^2.0.0",
+        "@symfony/webpack-encore": "^1.0.0",
+        "@tsconfig/node14": "^1.0.1",
+        "@types/lodash": "^4.14.176",
+        "core-js": "^3.0.0",
+        "regenerator-runtime": "^0.13.2",
+        "sass": "^1.43.4",
+        "sass-loader": "^12.3.0",
+        "stimulus": "^2.0.0",
+        "ts-loader": "^9.2.6",
+        "typescript": "^4.4.4",
+        "vue": "^2.6.14",
+        "vue-loader": "^15.9.8",
+        "vue-template-compiler": "^2.6.14",
+        "webpack-notifier": "^1.6.0"
+    },
+    "license": "UNLICENSED",
+    "private": true,
+    "scripts": {
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress"
+    },
+    "dependencies": {
+        "@symfony/stimulus-bridge-types": "^1.0.0",
+        "@types/vue-select": "^3.11.2",
+        "@types/webpack-env": "^1.16.3",
+        "axios": "^0.24.0",
+        "bootstrap": "^5.1.3",
+        "lodash": "^4.17.21",
+        "tslib": "^2.3.1",
+        "vue-property-decorator": "^9.1.2",
+        "vue-select": "^3.16.0"
+    }
+}

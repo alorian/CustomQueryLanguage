@@ -1,0 +1,40 @@
+.icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+
+    &.icon-ok {
+        background: url("../images/ok.png") center center no-repeat;
+    }
+
+    &.icon-error {
+        background: url("../images/error.png") center center no-repeat;
+    }
+
+    &.icon-question {
+        background: url("../images/question.png") center center no-repeat;
+    }
+}
+
+.icon.query-status {
+    margin-top: 2px;
+    margin-left: 10px;
+    height: 100%;
+}
+
+
+.help-link {
+    display: inline-block;
+    margin-top: 2px;
+    height: 100%;
+
+    .icon {
+        height: 100%;
+    }
+}
+
+.vs--single.vs--searching:not(.vs--open):not(.vs--loading) {
+    .vs__search {
+        opacity: 1;
+    }
+}

@@ -2,6 +2,9 @@
 
 namespace App\Transpiler;
 
+use App\Exception\LexerUnexpectedCharacterException;
+use App\Exception\LexerUnterminatedStringException;
+use App\Exception\ParserUnexpectedTokenException;
 use App\Lexer\Lexer;
 use App\Parser\Parser;
 
@@ -15,6 +18,13 @@ class Transpiler
     ) {
     }
 
+    /**
+     * @param string $rawQuery
+     * @return string
+     * @throws LexerUnexpectedCharacterException
+     * @throws LexerUnterminatedStringException
+     * @throws ParserUnexpectedTokenException
+     */
     public function transpile(string $rawQuery): string
     {
         $tokensList = $this->lexer->analyze($rawQuery);

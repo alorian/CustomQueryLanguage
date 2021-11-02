@@ -16,13 +16,20 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class ParserCompilerTest extends KernelTestCase
 {
-    protected static ParserCompiler $parserCompiler;
+    protected static ?ParserCompiler $parserCompiler;
 
     public static function setUpBeforeClass(): void
     {
+        parent::setUpBeforeClass();
         self::bootKernel();
         static::$parserCompiler = self::getContainer()->get(ParserCompiler::class);
         static::$parserCompiler->compile();
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        parent::tearDownAfterClass();
+        static::$parserCompiler = null;
     }
 
     public function testErrorOperation(): void
