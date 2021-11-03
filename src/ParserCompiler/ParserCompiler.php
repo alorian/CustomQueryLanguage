@@ -47,10 +47,6 @@ class ParserCompiler
 
     protected array $grammarRulesMap = [];
 
-    protected array $firstTerminalsTable = [];
-
-    protected array $followingTerminalsTable = [];
-
     public function __construct(
         protected FiniteStateMachine $finiteStateMachine,
         protected TransitionTable $transitionTable,
@@ -69,12 +65,18 @@ class ParserCompiler
 
         // building auxiliary table with first terminals foreach non-terminal
         foreach ($this->nonTerminalsList as $nonTerminalClassName) {
-            $this->firstTerminalsTable[$nonTerminalClassName] = $this->findFirstTerminals($nonTerminalClassName);
+            $this->transitionTable->pushFirstTerminals(
+                $nonTerminalClassName,
+                $this->findFirstTerminals($nonTerminalClassName)
+            );
         }
 
         // building auxiliary table with following terminals foreach non-terminal
         foreach ($this->nonTerminalsList as $nonTerminalClassName) {
-            $this->followingTerminalsTable[$nonTerminalClassName] = $this->findFollowingTerminals($nonTerminalClassName);
+            $this->transitionTable->pushFollowingTerminals(
+                $nonTerminalClassName,
+                $this->findFollowingTerminals($nonTerminalClassName)
+            );
         }
     }
 
@@ -86,7 +88,6 @@ class ParserCompiler
         $transitionsList = $this->finiteStateMachine->getTransitionsList();
 
         foreach ($statesList as $state) {
-            /** @var State $state */
             $this->addReduceOperations($state);
 
             if (isset($transitionsList[$state->index])) {
@@ -130,7 +131,7 @@ class ParserCompiler
                         new OperationAccept()
                     );
                 } else {
-                    foreach ($this->followingTerminalsTable[$stateCondition->rule->left] as $terminalClass) {
+                    foreach ($this->transitionTable->getFollowingTerminals($stateCondition->rule->left) as $terminalClass) {
                         $this->transitionTable->pushTransition(
                             $state,
                             $terminalClass,
@@ -156,7 +157,7 @@ class ParserCompiler
                 if (is_subclass_of($followingItem, AbstractToken::class)) {
                     $followingTerminalsList[$followingItem] = $followingItem;
                 } else {
-                    foreach ($this->firstTerminalsTable[$followingItem] as $terminalClass) {
+                    foreach ($this->transitionTable->getFirstTerminals($followingItem) as $terminalClass) {
                         $followingTerminalsList[$terminalClass] = $terminalClass;
                     }
                 }

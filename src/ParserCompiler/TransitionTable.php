@@ -15,6 +15,12 @@ class TransitionTable
 
     protected array $operationsMap = [];
 
+    // auxiliary table with first terminals foreach non-terminal
+    protected array $firstTerminalsTable = [];
+
+    // auxiliary table with following terminals foreach non-terminal
+    protected array $followingTerminalsTable = [];
+
     public function pushTransition(
         State $state,
         string $tokenClass,
@@ -34,21 +40,38 @@ class TransitionTable
             return $this->operationsMap[$stateIndex][$token::class];
         }
 
-        return $this->makeOperationError($stateIndex);
+        return new OperationError($this->getExpectedTokensClasses($stateIndex));
     }
 
-    protected function makeOperationError(int $stateIndex): OperationError
+    public function getExpectedTokensClasses(int $stateIndex): array
     {
         $tokenClassesList = [];
         if (isset($this->operationsMap[$stateIndex])) {
             foreach ($this->operationsMap[$stateIndex] as $tokenClass => $operation) {
-                if (is_subclass_of($tokenClass, AbstractToken::class)) {
-                    $tokenClassesList[] = $tokenClass;
-                }
+                $tokenClassesList[] = $tokenClass;
             }
         }
+        return $tokenClassesList;
+    }
 
-        return new OperationError($tokenClassesList);
+    public function pushFirstTerminals(string $nonTerminalClass, array $terminalClassesList): void
+    {
+        $this->firstTerminalsTable[$nonTerminalClass] = $terminalClassesList;
+    }
+
+    public function getFirstTerminals(string $nonTerminalClass): array
+    {
+        return $this->firstTerminalsTable[$nonTerminalClass] ?? [];
+    }
+
+    public function pushFollowingTerminals(string $nonTerminalClass, array $terminalClassesList): void
+    {
+        $this->followingTerminalsTable[$nonTerminalClass] = $terminalClassesList;
+    }
+
+    public function getFollowingTerminals(string $nonTerminalClass): array
+    {
+        return $this->followingTerminalsTable[$nonTerminalClass] ?? [];
     }
 
 }
