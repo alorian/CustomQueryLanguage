@@ -11,7 +11,6 @@ class AcceptedQueryNode extends AbstractNode
     public const RULES = [
         [
             QueryNode::class,
-            EolToken::class
         ]
     ];
 

@@ -163,6 +163,8 @@ class ParserCompiler
             }
         }
 
+        $followingTerminalsList[EolToken::class] = EolToken::class;
+
         return $followingTerminalsList;
     }
 

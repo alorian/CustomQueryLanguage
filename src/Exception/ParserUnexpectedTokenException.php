@@ -12,13 +12,13 @@ use Throwable;
 class ParserUnexpectedTokenException extends Exception
 {
     /**
-     * @param OperationError $operationError
+     * @param OperationError|null $operationError
      * @param AbstractToken|null $currentToken
      * @param Throwable|null $previous
      */
     #[Pure]
     public function __construct(
-        public OperationError $operationError,
+        public ?OperationError $operationError = null,
         public ?AbstractToken $currentToken = null,
         Throwable $previous = null
     ) {
@@ -30,7 +30,7 @@ class ParserUnexpectedTokenException extends Exception
             $message .= ' at ' . $this->currentToken->pos;
         }
 
-        if (!empty($operationError->expectedTokensList)) {
+        if ($operationError !== null && !empty($operationError->expectedTokensList)) {
             $message .= '. Expected ';
             $types = [];
             foreach ($this->operationError->expectedTokensList as $className) {

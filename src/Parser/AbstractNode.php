@@ -19,7 +19,7 @@ class AbstractNode
         $this->children[] = $node;
     }
 
-    public function unshift(AbstractToken|AbstractNode $node): void
+    public function unshiftChildren(AbstractToken|AbstractNode $node): void
     {
         array_unshift($this->children, $node);
     }

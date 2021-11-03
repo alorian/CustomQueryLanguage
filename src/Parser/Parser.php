@@ -21,6 +21,8 @@ class Parser
 
     protected TransitionTable $transitionTable;
 
+    protected \SplStack $parsingStack;
+
     public function __construct(protected ParserCompiler $parserCompiler)
     {
         $parserCompiler->compile();
@@ -35,55 +37,61 @@ class Parser
         $this->currentPos = 0;
         $this->tokensList = $tokensList;
 
-        $parsingStack = new \SplStack();
-        $parsingStack->push(0);
-
-        $valuesStack = new \SplStack();
+        $this->parsingStack = new \SplStack();
+        $this->parsingStack->push(0);
 
         $accepted = false;
-        $token = $this->advance();
-        while (!$accepted) {
+        while (!$this->isAtEnd() && !$accepted) {
             $operation = $this->transitionTable->getTransition(
-                $parsingStack->top(),
-                $token ?? $valuesStack->top()
+                $this->parsingStack->top(),
+                $this->getCurrentToken()
             );
 
             switch ($operation::class) {
                 case OperationAccept::class:
                     $accepted = true;
+                    $this->parsingStack->pop();
                     break;
 
                 case OperationShift::class:
-                    $parsingStack->push($operation->nextState->index);
-                    $valuesStack->push($token);
-                    $token = $this->advance();
+                    $this->parsingStack->push($this->getCurrentToken());
+                    $this->parsingStack->push($operation->nextState->index);
+                    $this->next();
                     break;
 
                 case OperationReduce::class:
                     /** @var AbstractNode $node */
                     $node = new $operation->rule->left();
                     for ($i = 0; $i < $operation->rule->length(); $i++) {
-                        $node->unshift($valuesStack->pop());
-                        $parsingStack->pop();
+                        $this->parsingStack->pop();
+                        $node->unshiftChildren($this->parsingStack->pop());
                     }
 
-                    $valuesStack->push($node);
-                    $operationGoTo = $this->transitionTable->getTransition($parsingStack->top(), $node);
-                    $parsingStack->push($operationGoTo->nextState->index);
+                    $operationGoTo = $this->transitionTable->getTransition($this->parsingStack->top(), $node);
+                    $this->parsingStack->push($node);
+                    $this->parsingStack->push($operationGoTo->nextState->index);
                     break;
 
                 default:
-                    throw new ParserUnexpectedTokenException($operation, $token);
+                    throw new ParserUnexpectedTokenException($operation, $this->getCurrentToken());
             }
         }
-        $valuesStack->pop();//EolToken
 
-        return $valuesStack->pop();//QueryNode
+        if ($accepted) {
+            return $this->parsingStack->pop();//QueryNode
+        }
+
+        throw new ParserUnexpectedTokenException();
     }
 
-    protected function advance(): ?AbstractToken
+    protected function getCurrentToken(): ?AbstractToken
     {
-        return $this->tokensList[$this->currentPos++] ?? null;
+        return $this->tokensList[$this->currentPos] ?? null;
+    }
+
+    protected function next(): void
+    {
+        $this->currentPos++;
     }
 
     #[Pure]
