@@ -22,4 +22,9 @@ class FieldsBag
         return isset($this->fieldsList[$fieldName]);
     }
 
+    public function getPossibleNames(): array
+    {
+        return array_keys($this->fieldsList);
+    }
+
 }

@@ -18,18 +18,29 @@ use App\Parser\Node\FieldNode;
 use App\Parser\Node\PrimaryNode;
 use App\Parser\Node\QueryNode;
 use App\Parser\Node\SimpleCondExpressionNode;
+use RuntimeException;
 
 class SqlVisitor implements VisitorInterface
 {
+
+    /** @var array|TranspilerUnknownFieldException[] */
+    protected array $exceptionsList = [];
 
     public function __construct(
         protected FieldsBag $fieldsBag
     ) {
     }
 
-    /**
-     * @throws TranspilerUnknownFieldException
-     */
+    public function getExceptionsList(): array
+    {
+        return $this->exceptionsList;
+    }
+
+    public function resetExceptionsList(): void
+    {
+        $this->exceptionsList = [];
+    }
+
     public function visit(AbstractNode $node): string
     {
         return match ($node::class) {
@@ -45,7 +56,8 @@ class SqlVisitor implements VisitorInterface
             ContainsOperatorNode::class => $this->visitContainsOperatorNode($node),
             PrimaryNode::class => $this->visitPrimaryNode($node),
             FieldNode::class => $this->visitFieldNode($node),
-            default => throw new \RuntimeException('Unknown node type'),
+
+            default => throw new RuntimeException('Unknown node type'),
         };
     }
 
@@ -171,17 +183,15 @@ class SqlVisitor implements VisitorInterface
         return "'" . $node->children[0]->value . "'";
     }
 
-    /**
-     * @throws TranspilerUnknownFieldException
-     */
     protected function visitFieldNode(AbstractNode $node): string
     {
         $fieldName = strtolower($node->children[0]->value);
-        if ($this->fieldsBag->fieldExists($fieldName)) {
-            return $fieldName;
+
+        if (!$this->fieldsBag->fieldExists($fieldName)) {
+            $this->exceptionsList[] = new TranspilerUnknownFieldException($node->children[0]);
         }
 
-        throw new TranspilerUnknownFieldException($node->children[0]);
+        return $fieldName;
     }
 
 }

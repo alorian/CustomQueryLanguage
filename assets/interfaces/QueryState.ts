@@ -6,7 +6,7 @@ export default interface QueryState {
 
     caretPos: number
 
-    suggestionsList: Array<string>
+    suggestionsList: Array<{ label: string, value: string }>
 
     errorsList: Array<string>
 

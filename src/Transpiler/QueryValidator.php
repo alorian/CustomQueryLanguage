@@ -19,7 +19,13 @@ class QueryValidator
         try {
             $tokensList = $this->lexer->analyze($queryState->getQuery());
             $queryNode = $this->parser->parse($tokensList);
+
+            $this->sqlVisitor->resetExceptionsList();
             $queryNode->accept($this->sqlVisitor);
+
+            foreach ($this->sqlVisitor->getExceptionsList() as $exception) {
+                $queryState->errorsList[] = $exception;
+            }
         } catch (\Throwable $exception) {
             $queryState->valid = false;
             $queryState->errorsList[] = $exception;

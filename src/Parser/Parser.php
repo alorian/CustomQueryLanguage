@@ -32,7 +32,7 @@ class Parser
     /**
      * @throws ParserUnexpectedTokenException
      */
-    public function parse(array $tokensList): QueryNode
+    public function parse(array $tokensList, string $breakAtNodeClass = null): QueryNode
     {
         $this->currentPos = 0;
         $this->tokensList = $tokensList;
@@ -50,7 +50,6 @@ class Parser
             switch ($operation::class) {
                 case OperationAccept::class:
                     $accepted = true;
-                    $this->parsingStack->pop();
                     break;
 
                 case OperationShift::class:
@@ -60,8 +59,13 @@ class Parser
                     break;
 
                 case OperationReduce::class:
+                    if ($breakAtNodeClass !== null && $operation->rule->left === $breakAtNodeClass) {
+                        throw new \RuntimeException('Manual break on ' . $breakAtNodeClass);
+                    }
+
                     /** @var AbstractNode $node */
-                    $node = new $operation->rule->left();
+                    $newNodeClassName = $operation->rule->left;
+                    $node = new $newNodeClassName();
                     for ($i = 0; $i < $operation->rule->length(); $i++) {
                         $this->parsingStack->pop();
                         $node->unshiftChildren($this->parsingStack->pop());
@@ -78,10 +82,32 @@ class Parser
         }
 
         if ($accepted) {
-            return $this->parsingStack->pop();//QueryNode
+            //QueryNode is on the second position from the top
+            return $this->parsingStack->offsetGet(1);
         }
 
-        throw new ParserUnexpectedTokenException();
+        throw new ParserUnexpectedTokenException(null, $this->getCurrentToken());
+    }
+
+    public function getExpectedTokens(): array
+    {
+        if (!isset($this->parsingStack)) {
+            throw new \RuntimeException('Expected tokens can be got only after the parsing');
+        }
+
+        $stateIndex = $this->parsingStack->top();
+
+        $result = [];
+        foreach ($this->transitionTable->getExpectedTokensClasses($stateIndex) as $tokensClass) {
+            $result[$tokensClass] = $tokensClass;
+            if (!is_subclass_of($tokensClass, AbstractToken::class)) {
+                foreach ($this->transitionTable->getFirstTerminals($tokensClass) as $firstTerminal) {
+                    $result[$firstTerminal] = $firstTerminal;
+                }
+            }
+        }
+
+        return $result;
     }
 
     protected function getCurrentToken(): ?AbstractToken

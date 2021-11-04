@@ -7,11 +7,16 @@
           <div class="col-11">
             <v-select
                 v-on:search="onQueryInput"
+                v-on:input="onSuggestionSelect"
+                :value="''"
                 :components="{OpenIndicator}"
                 :dropdownShouldOpen="shouldOpen"
                 :clearSearchOnBlur="() => false"
                 :clearSearchOnSelect="false"
                 :filterable="false"
+                :clearable="false"
+                :options="queryState.suggestionsList"
+                :transition="''"
             >
               <template v-slot:no-options="{ search, searching }">
                 <div class="text-left">
@@ -26,7 +31,6 @@
 
                 <input
                     class="vs__search"
-                    ref="input"
                     v-bind="search.attributes"
                     v-on="search.events"
                 />
@@ -94,15 +98,15 @@ export default class App extends Vue {
   }
 
   shouldOpen(): boolean {
-    return false;
-    //return this.queryState.suggestionsList.length > 0;
+    return this.queryState.suggestionsList.length > 0;
   }
 
   onQueryInput(query: string) {
     this.queryState.query = query
 
-    if (this.$refs.input && this.$refs.input instanceof HTMLInputElement && this.$refs.input.selectionStart) {
-      this.queryState.caretPos = this.$refs.input.selectionStart
+    if (this.$refs.search && this.$refs.search instanceof HTMLInputElement && this.$refs.search.selectionStart) {
+      this.queryState.caretPos = this.$refs.search.selectionStart
+      this.$refs.search.focus()
     } else {
       this.queryState.caretPos = 0
     }
@@ -110,10 +114,30 @@ export default class App extends Vue {
     this.queryInput()
   }
 
+  onSuggestionSelect(suggestion: { label: string, value: string }) {
+    let newQuery = this.queryState.query;
+    newQuery = newQuery.substring(0, this.queryState.caretPos) + suggestion.value + newQuery.substring(this.queryState.caretPos);
+
+    const newCaretPos = this.queryState.caretPos + suggestion.value.length
+
+    this.queryState.suggestionsList = []
+
+    if (this.$refs.search && this.$refs.search instanceof HTMLInputElement) {
+      this.$refs.search.value = newQuery
+      this.$refs.search.selectionStart = newCaretPos
+
+      this.$refs.search.dispatchEvent(new Event('input', {
+        bubbles: true,
+        cancelable: true,
+      }))
+    }
+  }
+
   async validateQuery() {
     try {
       const validationResponse = await Api.validateQuery(this.queryState.query, this.queryState.caretPos)
-      this.queryState = validationResponse.data
+      this.$set(this.queryState, 'suggestionsList', validationResponse.data.suggestionsList)
+      this.$set(this.queryState, 'errorsList', validationResponse.data.errorsList)
     } catch (e: any) {
       this.queryState.valid = false;
       this.queryState.errorsList = [e.message]
