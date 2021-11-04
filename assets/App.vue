@@ -136,8 +136,7 @@ export default class App extends Vue {
   async validateQuery() {
     try {
       const validationResponse = await Api.validateQuery(this.queryState.query, this.queryState.caretPos)
-      this.$set(this.queryState, 'suggestionsList', validationResponse.data.suggestionsList)
-      this.$set(this.queryState, 'errorsList', validationResponse.data.errorsList)
+      this.queryState = validationResponse.data
     } catch (e: any) {
       this.queryState.valid = false;
       this.queryState.errorsList = [e.message]
