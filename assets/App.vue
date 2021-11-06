@@ -17,6 +17,8 @@
                 :clearable="false"
                 :options="queryState.suggestionsList"
                 :transition="''"
+                :select-on-key-codes="[]"
+                :map-keydown="keydownHandlers"
             >
 
               <template v-slot:no-options="{ search, searching }"></template>
@@ -68,7 +70,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import ProjectsList from "./components/ProjectsList.vue";
 import OpenIndicator from "./components/OpenIndicator.vue";
-import vSelect, { VueSelectData } from 'vue-select';
+import vSelect from 'vue-select';
 import Project from "./interfaces/Project";
 import QueryState from "./interfaces/QueryState"
 import { debounce } from "lodash";
@@ -101,7 +103,7 @@ export default class App extends Vue {
     this.fetchProjects()
   }
 
-  shouldOpen(VueSelect: VueSelectData): boolean {
+  shouldOpen(VueSelect: any): boolean {
     return this.queryState.suggestionsList.length > 0 && VueSelect.open;
   }
 
@@ -162,9 +164,23 @@ export default class App extends Vue {
     }
   }
 
-  highlightSuggestion(suggestion: {label: string, value: string}) {
+  highlightSuggestion(suggestion: { label: string, value: string }) {
     const pos = suggestion.label.length - suggestion.value.length
     return '<strong>' + suggestion.label.substring(0, pos) + '</strong>' + suggestion.label.substring(pos)
+  }
+
+  keydownHandlers(map: { [key: number]: Function }, VueSelect: any) {
+    return {
+      ...map,
+      13: (e: KeyboardEvent) => {
+        // select suggestion on Enter if dropdown is open
+        // fetch request on Enter if dropdown is closed
+        if (this.shouldOpen(VueSelect)) {
+          e.preventDefault()
+        }
+        VueSelect.typeAheadSelect()
+      }
+    }
   }
 
 }
