@@ -53,7 +53,7 @@
       </form>
     </div>
 
-    <div v-if="queryState.errorsList" class="text-danger">
+    <div v-if="showErrors && queryState.errorsList" class="text-danger">
       <div v-for="error in queryState.errorsList">
         {{ error }}
       </div>
@@ -93,6 +93,8 @@ export default class App extends Vue {
     errorsList: []
   }
 
+  showErrors = false
+
   queryInput = debounce(this.validateQuery, 350)
 
   created() {
@@ -104,6 +106,7 @@ export default class App extends Vue {
   }
 
   onQueryInput(query: string) {
+    this.showErrors = false
     this.queryState.query = query
 
     if (this.$refs.search && this.$refs.search instanceof HTMLInputElement && this.$refs.search.selectionStart) {
@@ -146,6 +149,7 @@ export default class App extends Vue {
   }
 
   async fetchProjects() {
+    this.showErrors = true
     try {
       const fetchResponse = await Api.fetchProjects(this.queryState.query, this.queryState.caretPos)
       this.queryState = fetchResponse.data.queryState
