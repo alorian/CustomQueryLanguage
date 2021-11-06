@@ -18,10 +18,11 @@
                 :options="queryState.suggestionsList"
                 :transition="''"
             >
-              <template v-slot:no-options="{ search, searching }">
-                <div class="text-left">
-                  Syntax
-                </div>
+
+              <template v-slot:no-options="{ search, searching }"></template>
+
+              <template v-slot:option="suggestion">
+                <span v-html="highlightSuggestion(suggestion)"></span>
               </template>
 
               <template v-slot:search="search">
@@ -42,6 +43,7 @@
                   <span class="icon icon-question"></span>
                 </a>
               </template>
+
             </v-select>
           </div>
           <div class="col-1">
@@ -154,6 +156,11 @@ export default class App extends Vue {
       this.queryState.valid = false;
       this.queryState.errorsList = [e.message]
     }
+  }
+
+  highlightSuggestion(suggestion: {label: string, value: string}) {
+    const pos = suggestion.label.length - suggestion.value.length
+    return '<strong>' + suggestion.label.substring(0, pos) + '</strong>' + suggestion.label.substring(pos)
   }
 
 }

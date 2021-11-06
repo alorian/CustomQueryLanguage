@@ -4,6 +4,8 @@
 // 2. Include any default variable overrides here
 $vs-border-radius: 1px !default;
 $vs-component-line-height: 1.8 !default;
+$vs-state-active-bg: #f4f5f7 !default;
+$vs-state-active-color: inherit !default;
 
 // 3. Include remainder of required Bootstrap stylesheets
 @import "../../node_modules/bootstrap/scss/variables";
