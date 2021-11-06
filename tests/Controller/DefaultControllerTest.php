@@ -135,6 +135,6 @@ class DefaultControllerTest extends WebTestCase
         // ProjectsList
         $this->assertArrayHasKey('projectsList', $responseData);
         $this->assertIsArray($responseData['projectsList']);
-        //$this->assertNotEmpty($responseData['projectsList']);
+        $this->assertNotEmpty($responseData['projectsList']);
     }
 }

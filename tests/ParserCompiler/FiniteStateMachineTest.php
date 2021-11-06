@@ -70,7 +70,7 @@ class FiniteStateMachineTest extends KernelTestCase
     public function testGeneralWork(): void
     {
         $statesList = static::$finiteStateMachine->getStatesList();
-        $transitionsList = static::$finiteStateMachine->getStatesList();
+        $transitionsList = static::$finiteStateMachine->getTransitionsList();
 
         $this->assertNotEmpty($statesList);
         $this->assertNotEmpty($transitionsList);
