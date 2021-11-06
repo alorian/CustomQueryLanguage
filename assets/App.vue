@@ -68,7 +68,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import ProjectsList from "./components/ProjectsList.vue";
 import OpenIndicator from "./components/OpenIndicator.vue";
-import vSelect from 'vue-select';
+import vSelect, { VueSelectData } from 'vue-select';
 import Project from "./interfaces/Project";
 import QueryState from "./interfaces/QueryState"
 import { debounce } from "lodash";
@@ -101,8 +101,8 @@ export default class App extends Vue {
     this.fetchProjects()
   }
 
-  shouldOpen(): boolean {
-    return this.queryState.suggestionsList.length > 0;
+  shouldOpen(VueSelect: VueSelectData): boolean {
+    return this.queryState.suggestionsList.length > 0 && VueSelect.open;
   }
 
   onQueryInput(query: string) {

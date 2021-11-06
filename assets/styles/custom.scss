@@ -33,8 +33,22 @@
     }
 }
 
-.vs--single.vs--searching:not(.vs--open):not(.vs--loading) {
-    .vs__search {
-        opacity: 1;
+.v-select {
+    &.vs--single.vs--searching:not(.vs--open):not(.vs--loading) {
+        .vs__search {
+            opacity: 1;
+        }
+    }
+
+    &.vs--open .vs__dropdown-toggle{
+        border-bottom-color: $vs-border-color;
+    }
+
+    .vs__dropdown-menu {
+        width: auto;
+    }
+
+    .vs__no-options {
+        display: none;
     }
 }
