@@ -3,6 +3,8 @@
 It's a Custom Query Language demo application written on top of the Symfony framework. 
 You write a query, and you get the needed results from a database.
 
+[![Demo Custom Query App](docs/images/CustomQueryLanguage.gif)](https://youtu.be/XmGpKVYzc2w)
+
 The custom query language allows to define any grammar rules and be
 sure the user entered a correct query. It’s a simplification of the SQL and
 in the same time it adds new unique functionality by your needs.
@@ -197,7 +199,7 @@ There are four types of actions:
 3. Goto, change the state without consuming next symbol
 4. Accept, the parsing is finished
 
-The logic behind this adding is to complex to describe it here. You can check 
+The logic behind this adding is too complex to describe it here. You can check 
 the [parser compiler source code](src/ParserCompiler/ParserCompiler.php) to learn more.
 
 ### How the transitions table looks like? Can you give an example?
