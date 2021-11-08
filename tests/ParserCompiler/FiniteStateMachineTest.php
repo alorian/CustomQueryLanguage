@@ -22,11 +22,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 class FiniteStateMachineTest extends KernelTestCase
 {
 
-    protected static ?FiniteStateMachine $finiteStateMachine;
-
-    public static function setUpBeforeClass(): void
+    public function testGeneralWork(): void
     {
-        parent::setUpBeforeClass();
         self::bootKernel();
 
         $nonTerminalsList = [
@@ -56,21 +53,12 @@ class FiniteStateMachineTest extends KernelTestCase
             }
         }
 
-        static::$finiteStateMachine = self::getContainer()->get(FiniteStateMachine::class);
-        static::$finiteStateMachine->setGrammarRulesList($grammarRulesList);
-        static::$finiteStateMachine->build();
-    }
+        $finiteStateMachine = self::getContainer()->get(FiniteStateMachine::class);
+        $finiteStateMachine->setGrammarRulesList($grammarRulesList);
+        $finiteStateMachine->build();
 
-    public static function tearDownAfterClass(): void
-    {
-        parent::tearDownAfterClass();
-        static::$finiteStateMachine = null;
-    }
-
-    public function testGeneralWork(): void
-    {
-        $statesList = static::$finiteStateMachine->getStatesList();
-        $transitionsList = static::$finiteStateMachine->getTransitionsList();
+        $statesList = $finiteStateMachine->getStatesList();
+        $transitionsList = $finiteStateMachine->getTransitionsList();
 
         $this->assertNotEmpty($statesList);
         $this->assertNotEmpty($transitionsList);

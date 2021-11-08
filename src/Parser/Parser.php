@@ -8,7 +8,6 @@ use App\Parser\Node\QueryNode;
 use App\ParserCompiler\Operation\OperationAccept;
 use App\ParserCompiler\Operation\OperationReduce;
 use App\ParserCompiler\Operation\OperationShift;
-use App\ParserCompiler\ParserCompiler;
 use App\ParserCompiler\TransitionTable;
 use JetBrains\PhpStorm\Pure;
 
@@ -19,14 +18,12 @@ class Parser
 
     protected int $currentPos;
 
-    protected TransitionTable $transitionTable;
 
     protected \SplStack $parsingStack;
 
-    public function __construct(protected ParserCompiler $parserCompiler)
-    {
-        $parserCompiler->compile();
-        $this->transitionTable = $parserCompiler->getTransitionTable();
+    public function __construct(
+        protected TransitionTable $transitionTable
+    ) {
     }
 
     /**
@@ -59,10 +56,6 @@ class Parser
                     break;
 
                 case OperationReduce::class:
-                    if ($breakAtNodeClass !== null && $operation->rule->left === $breakAtNodeClass) {
-                        throw new \RuntimeException('Manual break on ' . $breakAtNodeClass);
-                    }
-
                     /** @var AbstractNode $node */
                     $newNodeClassName = $operation->rule->left;
                     $node = new $newNodeClassName();
@@ -87,27 +80,6 @@ class Parser
         }
 
         throw new ParserUnexpectedTokenException(null, $this->getCurrentToken());
-    }
-
-    public function getExpectedTokens(): array
-    {
-        if (!isset($this->parsingStack)) {
-            throw new \RuntimeException('Expected tokens can be got only after the parsing');
-        }
-
-        $stateIndex = $this->parsingStack->top();
-
-        $result = [];
-        foreach ($this->transitionTable->getExpectedTokensClasses($stateIndex) as $tokensClass) {
-            $result[$tokensClass] = $tokensClass;
-            if (!is_subclass_of($tokensClass, AbstractToken::class)) {
-                foreach ($this->transitionTable->getFirstTerminals($tokensClass) as $firstTerminal) {
-                    $result[$firstTerminal] = $firstTerminal;
-                }
-            }
-        }
-
-        return $result;
     }
 
     protected function getCurrentToken(): ?AbstractToken

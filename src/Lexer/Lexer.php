@@ -288,9 +288,6 @@ class Lexer
     #[Pure]
     protected function isAlphaNumeric(?string $char): bool
     {
-        if ($char === null) {
-            return false;
-        }
         return $this->isAlpha($char) || $this->isDigit($char);
     }
 

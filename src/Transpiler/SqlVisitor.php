@@ -27,7 +27,7 @@ class SqlVisitor implements VisitorInterface
     protected array $exceptionsList = [];
 
     public function __construct(
-        protected FieldsBag $fieldsBag
+        protected FieldsCollection $fieldsCollection
     ) {
     }
 
@@ -187,7 +187,7 @@ class SqlVisitor implements VisitorInterface
     {
         $fieldName = strtolower($node->children[0]->value);
 
-        if (!$this->fieldsBag->fieldExists($fieldName)) {
+        if (!$this->fieldsCollection->fieldExists($fieldName)) {
             $this->exceptionsList[] = new TranspilerUnknownFieldException($node->children[0]);
         }
 

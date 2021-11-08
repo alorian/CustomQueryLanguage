@@ -178,8 +178,6 @@ class ParserTest extends KernelTestCase
         $this->assertInstanceOf(ParenRightToken::class, $node->children[2]);
     }
 
-
-
     public function comparisonExpressionsProvider(): array
     {
         $dataSets = [];
@@ -202,7 +200,7 @@ class ParserTest extends KernelTestCase
     /**
      * @dataProvider comparisonExpressionsProvider
      */
-    public function testComparisonExpression(string $query)
+    public function testComparisonExpression(string $query): void
     {
         $tokensList = static::$lexer->analyze($query);
         $node = static::$parser->parse($tokensList);
@@ -217,7 +215,7 @@ class ParserTest extends KernelTestCase
         $this->assertInstanceOf(PrimaryNode::class, $node->children[2]);
     }
 
-    public function testContainsExpression()
+    public function testContainsExpression(): void
     {
         $query = 'name ~ test';
         $tokensList = static::$lexer->analyze($query);
@@ -231,6 +229,16 @@ class ParserTest extends KernelTestCase
         $this->assertInstanceOf(FieldNode::class, $node->children[0]);
         $this->assertInstanceOf(ContainsOperatorNode::class, $node->children[1]);
         $this->assertInstanceOf(PrimaryNode::class, $node->children[2]);
+    }
+
+    public function testTokensWithoutEoL(): void
+    {
+        $query = 'name = test';
+        $tokensList = static::$lexer->analyze($query);
+        $eolToken = array_pop($tokensList);
+
+        $this->expectException(ParserUnexpectedTokenException::class);
+        $node = static::$parser->parse($tokensList);
     }
 
 }

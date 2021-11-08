@@ -2,16 +2,16 @@
 
 namespace App\Transpiler;
 
-use Exception;
 use JetBrains\PhpStorm\ArrayShape;
+use Throwable;
 
-class QueryState
+class CustomQueryState
 {
 
-    public bool $valid = true;
+    protected bool $valid = true;
 
-    /** @var array|string[]|Exception[] */
-    public array $errorsList = [];
+    /** @var array|string[]|Throwable[] */
+    protected array $errorsList = [];
 
     /** @var array|string[] */
     public array $suggestionsList = [];
@@ -25,6 +25,22 @@ class QueryState
     public function getQuery(): string
     {
         return $this->query;
+    }
+
+    public function isValid(): bool
+    {
+        return $this->valid;
+    }
+
+    public function getErrors(): array
+    {
+        return $this->errorsList;
+    }
+
+    public function pushError(string|Throwable $error): void
+    {
+        $this->valid = false;
+        $this->errorsList[] = $error;
     }
 
     #[ArrayShape([
@@ -45,13 +61,12 @@ class QueryState
         ];
 
         foreach ($this->errorsList as $error) {
-            if ($error instanceof \Throwable) {
+            if ($error instanceof Throwable) {
                 $result['errorsList'][] = $error->getMessage();
             } else {
                 $result['errorsList'][] = $error;
             }
         }
-
 
         return $result;
     }

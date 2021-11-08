@@ -2,8 +2,7 @@
 
 namespace App\Controller;
 
-use App\Transpiler\QueryState;
-use App\Transpiler\QueryValidator;
+use App\Transpiler\CustomQueryState;
 use App\Transpiler\SuggestionManager;
 use App\Transpiler\Transpiler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,15 +22,15 @@ class DefaultController extends AbstractController
     #[Route('/validate', name: 'validate')]
     public function validate(
         Request $request,
-        QueryValidator $validator,
+        Transpiler $transpiler,
         SuggestionManager $suggestionManager
     ): JsonResponse {
         $data = $request->toArray();
         $rawQuery = $data['query'] ?? '';
         $caretPos = $data['caretPos'] ?? 0;
-        $queryState = new QueryState($rawQuery, $caretPos);
+        $queryState = new CustomQueryState($rawQuery, $caretPos);
 
-        $validator->validate($queryState);
+        $transpiler->transpile($queryState);
         $suggestionManager->addSuggestions($queryState);
 
         return new JsonResponse($queryState->toArray());
@@ -44,33 +43,26 @@ class DefaultController extends AbstractController
         $data = $request->toArray();
         $rawQuery = $data['query'] ?? '';
         $caretPos = $data['caretPos'] ?? 0;
-        $queryState = new QueryState($rawQuery, $caretPos);
+        $queryState = new CustomQueryState($rawQuery, $caretPos);
 
-        try {
-            $sqlQuery = 'SELECT * FROM project';
+        $sqlQueryPart = '';
+        if (!empty($rawQuery)) {
+            $sqlQueryPart = $transpiler->transpile($queryState);
+        }
 
-            if (!empty($rawQuery)) {
-                $sqlQuery .= ' ' . $transpiler->transpile($rawQuery);
-            }
-
+        if ($queryState->isValid()) {
+            $sqlQuery = 'SELECT * FROM project ' . $sqlQueryPart;
             $entityManager = $this->getDoctrine()->getManager();
             $connection = $entityManager->getConnection();
-
             $stmt = $connection->prepare($sqlQuery);
             $result = $stmt->execute();
-
             $data = $result->fetchAll();
             if (!empty($data)) {
                 $projectsList = $data;
             }
-        } catch (\Throwable $exception) {
-            $queryState->valid = false;
-            $queryState->errorsList[] = $exception;
         }
 
-        if (!$queryState->valid) {
-            $suggestionManager->addSuggestions($queryState);
-        }
+        $suggestionManager->addSuggestions($queryState);
 
         return new JsonResponse([
             'queryState' => $queryState->toArray(),

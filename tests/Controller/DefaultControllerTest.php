@@ -4,8 +4,10 @@ namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
+
 class DefaultControllerTest extends WebTestCase
 {
+
     public function testIndexRoute(): void
     {
         $client = static::createClient();
@@ -110,7 +112,7 @@ class DefaultControllerTest extends WebTestCase
         $this->assertEmpty($responseData['errorsList']);
     }
 
-    public function testProjectsRoute(): void
+    public function testProjectsRouteWithoutQuery(): void
     {
         $client = static::createClient();
         $client->jsonRequest('POST', '/projects');
@@ -136,5 +138,36 @@ class DefaultControllerTest extends WebTestCase
         $this->assertArrayHasKey('projectsList', $responseData);
         $this->assertIsArray($responseData['projectsList']);
         $this->assertNotEmpty($responseData['projectsList']);
+    }
+
+    public function testProjectsRouteWithQuery(): void
+    {
+        $client = static::createClient();
+        $client->jsonRequest('POST', '/projects', [
+            'query' => 'name = test'
+        ]);
+
+        $response = $client->getResponse();
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('application/json', $response->headers->get('Content-Type'));
+
+        $responseData = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        // QueryState
+        $this->assertArrayHasKey('queryState', $responseData);
+        $this->assertArrayHasKey('valid', $responseData['queryState']);
+        $this->assertIsBool($responseData['queryState']['valid']);
+
+        $this->assertArrayHasKey('suggestionsList', $responseData['queryState']);
+        $this->assertIsArray($responseData['queryState']['suggestionsList']);
+
+        $this->assertArrayHasKey('errorsList', $responseData['queryState']);
+        $this->assertIsArray($responseData['queryState']['errorsList']);
+
+        // ProjectsList
+        $this->assertArrayHasKey('projectsList', $responseData);
+        $this->assertIsArray($responseData['projectsList']);
+        $this->assertNotEmpty($responseData['projectsList']);
+        $this->assertCount(1, $responseData['projectsList']);
     }
 }

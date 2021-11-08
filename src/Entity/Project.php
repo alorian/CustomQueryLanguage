@@ -3,212 +3,71 @@
 namespace App\Entity;
 
 use App\Repository\ProjectRepository;
-use Doctrine\ORM\Mapping as ORM;
+use DateTimeImmutable;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\PrePersist;
+use Doctrine\ORM\Mapping\PreUpdate;
 
-/**
- * @ORM\Entity(repositoryClass=ProjectRepository::class)
- * @ORM\HasLifecycleCallbacks()
- */
+#[Entity(repositoryClass: ProjectRepository::class)]
+#[HasLifecycleCallbacks]
 class Project
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[Id]
+    #[GeneratedValue]
+    #[Column(type: 'integer')]
+    public ?int $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $name;
+    #[Column(type: 'string', length: 255)]
+    public ?string $name;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private ?int $sort;
+    #[Column(type: 'text', nullable: true)]
+    public ?string $description;
 
-    /**
-     * @ORM\Column(type="datetime_immutable")
-     */
-    private ?\DateTimeImmutable $created_at;
+    #[Column(type: 'integer', nullable: true)]
+    public ?int $sort;
 
-    /**
-     * @ORM\Column(type="datetime_immutable")
-     */
-    private ?\DateTimeImmutable $updated_at;
+    #[Column(type: 'string', length: 255)]
+    public ?string $source;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $source;
+    #[Column(type: 'string', length: 255)]
+    public ?string $epic;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $epic;
+    #[Column(type: 'string', length: 255)]
+    public ?string $assignee;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $assignee;
+    #[Column(type: 'string', length: 255)]
+    public ?string $owner;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $owner;
+    #[Column(type: 'string', length: 255)]
+    public ?string $responsible;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $responsible;
+    #[Column(type: 'datetime_immutable')]
+    public ?DateTimeImmutable $created_at;
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    private ?string $description;
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function getSort(): ?int
-    {
-        return $this->sort;
-    }
-
-    public function setSort(?int $sort): self
-    {
-        $this->sort = $sort;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $created_at): self
-    {
-        $this->created_at = $created_at;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updated_at;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updated_at): self
-    {
-        $this->updated_at = $updated_at;
-
-        return $this;
-    }
+    #[Column(type: 'datetime_immutable')]
+    public ?DateTimeImmutable $updated_at;
 
     /**
      * Gets triggered only on insert
-     * @ORM\PrePersist
      */
+    #[PrePersist]
     public function onPrePersist(): void
     {
-        $this->setCreatedAt(new \DateTimeImmutable('now'));
-        $this->setUpdatedAt(new \DateTimeImmutable('now'));
+        $this->created_at = new DateTimeImmutable('now');
+        $this->updated_at = new DateTimeImmutable('now');
     }
 
     /**
      * Gets triggered every time on update
-     * @ORM\PreUpdate
      */
+    #[PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->setUpdatedAt(new \DateTimeImmutable('now'));
+        $this->updated_at = new DateTimeImmutable('now');
     }
 
-    public function getSource(): ?string
-    {
-        return $this->source;
-    }
-
-    public function setSource(string $source): self
-    {
-        $this->source = $source;
-
-        return $this;
-    }
-
-    public function getEpic(): ?string
-    {
-        return $this->epic;
-    }
-
-    public function setEpic(string $epic): self
-    {
-        $this->epic = $epic;
-
-        return $this;
-    }
-
-    public function getAssignee(): ?string
-    {
-        return $this->assignee;
-    }
-
-    public function setAssignee(string $assignee): self
-    {
-        $this->assignee = $assignee;
-
-        return $this;
-    }
-
-    public function getOwner(): ?string
-    {
-        return $this->owner;
-    }
-
-    public function setOwner(string $owner): self
-    {
-        $this->owner = $owner;
-
-        return $this;
-    }
-
-    public function getResponsible(): ?string
-    {
-        return $this->responsible;
-    }
-
-    public function setResponsible(string $responsible): self
-    {
-        $this->responsible = $responsible;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): self
-    {
-        $this->description = $description;
-
-        return $this;
-    }
 }

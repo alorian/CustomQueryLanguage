@@ -14,16 +14,6 @@ class StateCondition
     ) {
     }
 
-    public function getNextClassName(): ?string
-    {
-        return $this->rule->get($this->markerPos);
-    }
-
-    public function getPrevClassName(): ?string
-    {
-        return $this->rule->get($this->markerPos - 1);
-    }
-
     public function markedIsNonTerminal(): bool
     {
         if (is_subclass_of($this->marked(), AbstractNode::class)) {

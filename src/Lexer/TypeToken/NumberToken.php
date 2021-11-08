@@ -16,9 +16,4 @@ class NumberToken extends AbstractToken
         parent::__construct($value, $pos);
         $this->value = (float)$this->value;
     }
-
-    public function negate(): void
-    {
-        $this->value = -$this->value;
-    }
 }

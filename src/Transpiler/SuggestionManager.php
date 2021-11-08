@@ -2,6 +2,7 @@
 
 namespace App\Transpiler;
 
+use App\Exception\ParserUnexpectedTokenException;
 use App\Lexer\KeywordToken\AndToken;
 use App\Lexer\KeywordToken\ByToken;
 use App\Lexer\KeywordToken\InToken;
@@ -27,6 +28,7 @@ use App\Lexer\TypeToken\EmptyToken;
 use App\Lexer\TypeToken\FalseToken;
 use App\Lexer\TypeToken\NullToken;
 use App\Lexer\TypeToken\TrueToken;
+use App\Lexer\TypeToken\UnexpectedToken;
 use App\Parser\Node\FieldNode;
 use App\Parser\Node\QueryNode;
 use App\Parser\Parser;
@@ -37,38 +39,40 @@ class SuggestionManager
     public function __construct(
         protected Lexer $lexer,
         protected Parser $parser,
-        protected FieldsBag $fieldsBag
+        protected FieldsCollection $fieldsCollection
     ) {
     }
 
-    public function addSuggestions(QueryState $queryState): void
+    public function addSuggestions(CustomQueryState $queryState): void
     {
-        if ($queryState->caretPos > 0) {
-            try {
-                // cutting initial request to the caret position
-                $rawQuery = substr($queryState->getQuery(), 0, $queryState->caretPos);
+        if ($queryState->caretPos === 0) {
+            return;
+        }
 
+        // cutting initial request to the caret position
+        $rawQuery = substr($queryState->getQuery(), 0, $queryState->caretPos);
 
-                $latestInput = null;
-                if (preg_match('#([\S]+)$#', $rawQuery, $matches) === 1) {
-                    $latestInput = $matches[0];
-                    // cutting raw query to parse it without the latest input
-                    $rawQuery = substr($rawQuery, 0, -strlen($latestInput));
-                }
+        $latestInput = null;
+        if (preg_match('#([\S]+)$#', $rawQuery, $matches) === 1) {
+            $latestInput = $matches[0];
+            $rawQuery = substr($rawQuery, 0, -strlen($latestInput));
+        }
 
-                $tokensList = $this->lexer->analyze($rawQuery);
-                try {
-                    // trying to parse the cut query without accepting. Stopping before the QueryNode
-                    $this->parser->parse($tokensList, QueryNode::class);
-                } catch (\Throwable $e) {
-                }
+        try {
+            $tokensList = $this->lexer->analyze($rawQuery);
 
-                $expectedTokensList = $this->parser->getExpectedTokens();
-                $expectedInputStrings = $this->makeExpectedInputStrings($expectedTokensList);
+            array_pop($tokensList);
+            $tokensList[] = new UnexpectedToken();
+            $this->parser->parse($tokensList);
+        } catch (ParserUnexpectedTokenException $exception) {
+            if ($exception->operationError !== null) {
+                $expectedInputStrings = $this->makeExpectedInputStrings(
+                    $exception->operationError->expectedTokensList
+                );
 
                 $queryState->suggestionsList = $this->makeSuggestions($expectedInputStrings, $latestInput);
-            } catch (\Throwable $e) {
             }
+        } catch (\Throwable $e) {
         }
     }
 
@@ -120,8 +124,8 @@ class SuggestionManager
                 case LessEqualToken::class:
                 case LessToken::class:
                 case NotEqualToken::class:
-                case ParenLeftToken::class:
-                case ParenRightToken::class:
+                //case ParenLeftToken::class:
+                //case ParenRightToken::class:
                 case PlusToken::class:
                 case StarToken::class:
                 case TildaToken::class:
@@ -133,9 +137,9 @@ class SuggestionManager
                     break;
 
                 case FieldNode::class:
-                    $possibleFieldNames = $this->fieldsBag->getPossibleNames();
+                    $possibleFieldNames = $this->fieldsCollection->getPossibleNames();
                     asort($possibleFieldNames);
-                    foreach ($this->fieldsBag->getPossibleNames() as $fieldName) {
+                    foreach ($this->fieldsCollection->getPossibleNames() as $fieldName) {
                         array_unshift($expectedStrings, $fieldName);
                     }
                     break;

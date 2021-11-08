@@ -47,10 +47,13 @@ class ParserCompiler
 
     protected array $grammarRulesMap = [];
 
+    protected TransitionTable $transitionTable;
+
     public function __construct(
         protected FiniteStateMachine $finiteStateMachine,
-        protected TransitionTable $transitionTable,
     ) {
+        $this->transitionTable = new TransitionTable();
+
         // making rules collection
         $grammarRuleIndex = 0;
         foreach ($this->nonTerminalsList as $nonTerminalClassName) {

@@ -2,10 +2,6 @@
 
 namespace App\Transpiler;
 
-use App\Exception\LexerUnexpectedCharacterException;
-use App\Exception\LexerUnterminatedStringException;
-use App\Exception\ParserUnexpectedTokenException;
-use App\Exception\TranspilerUnknownFieldException;
 use App\Lexer\Lexer;
 use App\Parser\Parser;
 
@@ -19,27 +15,26 @@ class Transpiler
     ) {
     }
 
-    /**
-     * @param string $rawQuery
-     * @return string
-     * @throws LexerUnexpectedCharacterException
-     * @throws LexerUnterminatedStringException
-     * @throws ParserUnexpectedTokenException
-     * @throws TranspilerUnknownFieldException
-     */
-    public function transpile(string $rawQuery): string
+
+    public function transpile(CustomQueryState $customQueryState): string
     {
-        $tokensList = $this->lexer->analyze($rawQuery);
-        $queryNode = $this->parser->parse($tokensList);
+        $sqlQueryPart = '';
 
-        $sqlQuery = $queryNode->accept($this->sqlVisitor);
+        try {
+            $tokensList = $this->lexer->analyze($customQueryState->getQuery());
+            $queryNode = $this->parser->parse($tokensList);
 
-        $exceptionsList = $this->sqlVisitor->getExceptionsList();
-        if (!empty($exceptionsList)) {
-            throw $exceptionsList[0];
+            $this->sqlVisitor->resetExceptionsList();
+            $sqlQueryPart = $queryNode->accept($this->sqlVisitor);
+
+            foreach ($this->sqlVisitor->getExceptionsList() as $exception) {
+                $customQueryState->pushError($exception);
+            }
+        } catch (\Throwable $exception) {
+            $customQueryState->pushError($exception);
         }
 
-        return $sqlQuery;
+        return $sqlQueryPart;
     }
 
 }

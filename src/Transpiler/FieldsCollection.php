@@ -5,7 +5,7 @@ namespace App\Transpiler;
 use App\Entity\Project;
 use Doctrine\ORM\EntityManagerInterface;
 
-class FieldsBag
+class FieldsCollection
 {
 
     protected array $fieldsList;
