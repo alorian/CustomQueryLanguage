@@ -3,7 +3,7 @@
 It's a Custom Query Language demo application written on top of the Symfony framework. 
 You write a query, and you get the needed results from a database.
 
-[![Demo Custom Query App](docs/images/CustomQueryLanguage.gif)](https://youtu.be/XmGpKVYzc2w)
+[![Demo Custom Query App](docs/images/custom_query_language_demo.gif)](https://youtu.be/XmGpKVYzc2w)
 
 The custom query language allows to define any grammar rules and be
 sure the user entered a correct query. It’s a simplification of the SQL and
