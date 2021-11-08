@@ -50,12 +50,12 @@ class SuggestionManager
         }
 
         // cutting initial request to the caret position
-        $rawQuery = substr($queryState->getQuery(), 0, $queryState->caretPos);
+        $rawQuery = mb_substr($queryState->getQuery(), 0, $queryState->caretPos);
 
         $latestInput = null;
         if (preg_match('#([\S]+)$#', $rawQuery, $matches) === 1) {
             $latestInput = $matches[0];
-            $rawQuery = substr($rawQuery, 0, -strlen($latestInput));
+            $rawQuery = mb_substr($rawQuery, 0, -mb_strlen($latestInput));
         }
 
         try {
@@ -82,10 +82,10 @@ class SuggestionManager
 
         if ($input !== null) {
             foreach ($stringsList as $string) {
-                if ($string !== $input && stripos($string, $input) === 0) {
+                if ($string !== $input && mb_stripos($string, $input) === 0) {
                     $suggestion = [
                         'label' => $string,
-                        'value' => substr($string, strlen($input))
+                        'value' => mb_substr($string, mb_strlen($input))
                     ];
                     $suggestionsList[] = $suggestion;
                 }
@@ -116,7 +116,7 @@ class SuggestionManager
                 case NotToken::class:
                 case OrderToken::class:
                 case OrToken::class:
-                case CommaToken::class:
+                //case CommaToken::class:
                 case DotToken::class:
                 case EqualToken::class:
                 case GreaterEqualToken::class:

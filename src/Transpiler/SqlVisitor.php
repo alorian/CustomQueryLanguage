@@ -263,8 +263,8 @@ class SqlVisitor implements VisitorInterface
      */
     protected function visitDateValueNode(AbstractNode $node): DateInterval
     {
-        $val = strtoupper($node->children[0]->value);
-        $modifier = substr($node->children[0]->value, -1);
+        $val = mb_strtoupper($node->children[0]->value);
+        $modifier = mb_substr($node->children[0]->value, -1);
 
         return match ($modifier) {
             'Y', 'y', 'M', 'D', 'd', 'W', 'w' => new DateInterval('P' . $val),
@@ -274,7 +274,7 @@ class SqlVisitor implements VisitorInterface
 
     protected function visitFieldNode(AbstractNode $node): string
     {
-        $fieldName = strtolower($node->children[0]->value);
+        $fieldName = mb_strtolower($node->children[0]->value);
 
         if (!$this->fieldsCollection->fieldExists($fieldName)) {
             $this->exceptionsList[] = new TranspilerUnknownFieldException($node->children[0]);

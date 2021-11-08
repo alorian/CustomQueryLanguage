@@ -164,22 +164,22 @@ class Lexer
 
     protected function advance(): ?string
     {
-        return $this->code[$this->currentPos++] ?? null;
+        return mb_substr($this->code, $this->currentPos++, 1);
     }
 
     protected function prevSymbol(): ?string
     {
-        return $this->code[$this->currentPos - 1] ?? null;
+        return mb_substr($this->code, ($this->currentPos - 1), 1);
     }
 
     protected function nextSymbol(): ?string
     {
-        return $this->code[$this->currentPos] ?? null;
+        return mb_substr($this->code, $this->currentPos, 1);
     }
 
     protected function nextSecondSymbol(): ?string
     {
-        return $this->code[$this->currentPos + 1] ?? null;
+        return mb_substr($this->code, ($this->currentPos + 1), 1);
     }
 
     protected function identifier(): void
@@ -188,8 +188,8 @@ class Lexer
             $this->advance();
         }
 
-        $lexeme = substr($this->code, $this->lexemeStartPos, ($this->currentPos - $this->lexemeStartPos));
-        $lexeme = strtolower($lexeme);
+        $lexeme = mb_substr($this->code, $this->lexemeStartPos, ($this->currentPos - $this->lexemeStartPos));
+        $lexeme = mb_strtolower($lexeme);
         if (isset($this::KEYWORDS[$lexeme])) {
             $this->addToken($this::KEYWORDS[$lexeme]);
         } else {
@@ -248,8 +248,8 @@ class Lexer
 
         $this->advance();// adding terminator symbol
 
-        $literal = substr($this->code, $this->lexemeStartPos, ($this->currentPos - $this->lexemeStartPos));
-        $literal = substr($literal, 1, -1);
+        $literal = mb_substr($this->code, $this->lexemeStartPos, ($this->currentPos - $this->lexemeStartPos));
+        $literal = mb_substr($literal, 1, -1);
 
         $this->addToken(StringToken::class, $literal);
     }
@@ -260,7 +260,7 @@ class Lexer
             return false;
         }
 
-        if (($this->code[$this->currentPos] ?? null) !== $char) {
+        if ($this->nextSymbol() !== $char) {
             return false;
         }
 
@@ -270,13 +270,13 @@ class Lexer
 
     protected function isAtEnd(): bool
     {
-        return $this->currentPos >= strlen($this->code);
+        return $this->currentPos >= mb_strlen($this->code);
     }
 
     protected function addToken(string $tokenClass, string $value = null): void
     {
         if ($value === null) {
-            $value = substr($this->code, $this->lexemeStartPos, ($this->currentPos - $this->lexemeStartPos));
+            $value = mb_substr($this->code, $this->lexemeStartPos, ($this->currentPos - $this->lexemeStartPos));
         }
         $this->tokensList[] = new $tokenClass($value, $this->lexemeStartPos);
     }
@@ -286,7 +286,7 @@ class Lexer
         if ($char === null) {
             return false;
         }
-        return $char >= '0' && $char <= '9';
+        return ctype_digit($char);
     }
 
     protected function isAlpha(?string $char): bool
@@ -294,10 +294,9 @@ class Lexer
         if ($char === null) {
             return false;
         }
-        return ($char >= 'a' && $char <= 'z') || ($char >= 'A' && $char <= 'Z') || $char === '_';
+        return preg_match('/^\p{L}+$/u', $char) === 1 || $char === '_';
     }
 
-    #[Pure]
     protected function isAlphaNumeric(?string $char): bool
     {
         return $this->isAlpha($char) || $this->isDigit($char);

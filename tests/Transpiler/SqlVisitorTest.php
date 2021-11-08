@@ -130,7 +130,7 @@ class SqlVisitorTest extends KernelTestCase
         $queryNode = self::$parser->parse($tokensList);
 
         $sql = $this->sqlVisitor->visit($queryNode);
-        $sql = substr($sql, 0, -6);// cutting minutes and seconds
+        $sql = mb_substr($sql, 0, -6);// cutting minutes and seconds
 
         $this->assertEquals($finalCutSql, $sql);
     }
