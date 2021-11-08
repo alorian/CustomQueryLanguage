@@ -7,7 +7,10 @@ use App\Lexer\AbstractToken;
 use App\Lexer\TypeToken\EolToken;
 use App\Parser\AbstractNode;
 use App\Parser\Node\AcceptedQueryNode;
-use App\Parser\Node\ComparisonExpressionNode;
+use App\Parser\Node\AlphanumericValueNode;
+use App\Parser\Node\AlphanumericComparisonExpressionNode;
+use App\Parser\Node\CommaSeparatedSequenceNode;
+use App\Parser\Node\DateComparisonExpression;
 use App\Parser\Node\ComparisonOperatorNode;
 use App\Parser\Node\ConditionalExpressionNode;
 use App\Parser\Node\ConditionalFactorNode;
@@ -15,8 +18,10 @@ use App\Parser\Node\ConditionalPrimaryNode;
 use App\Parser\Node\ConditionalTermNode;
 use App\Parser\Node\ContainsExpressionNode;
 use App\Parser\Node\ContainsOperatorNode;
+use App\Parser\Node\DateValue;
 use App\Parser\Node\FieldNode;
-use App\Parser\Node\PrimaryNode;
+use App\Parser\Node\InExpressionNode;
+use App\Parser\Node\NullComparisonExpressionNode;
 use App\Parser\Node\QueryNode;
 use App\Parser\Node\SimpleCondExpressionNode;
 use App\ParserCompiler\Operation\OperationAccept;
@@ -26,7 +31,7 @@ use App\ParserCompiler\Operation\OperationShift;
 
 class ParserCompiler
 {
-    protected array $nonTerminalsList = [
+    public const NON_TERMINALS_LIST = [
         AcceptedQueryNode::class,
         QueryNode::class,
         ConditionalExpressionNode::class,
@@ -34,12 +39,17 @@ class ParserCompiler
         ConditionalFactorNode::class,
         ConditionalPrimaryNode::class,
         SimpleCondExpressionNode::class,
-        ComparisonExpressionNode::class,
-        ComparisonOperatorNode::class,
+        AlphanumericComparisonExpressionNode::class,
+        DateComparisonExpression::class,
+        InExpressionNode::class,
         ContainsExpressionNode::class,
+        NullComparisonExpressionNode::class,
+        ComparisonOperatorNode::class,
         ContainsOperatorNode::class,
-        PrimaryNode::class,
+        CommaSeparatedSequenceNode::class,
         FieldNode::class,
+        AlphanumericValueNode::class,
+        DateValue::class
     ];
 
     /** @var array|GrammarRule[] */
@@ -56,7 +66,7 @@ class ParserCompiler
 
         // making rules collection
         $grammarRuleIndex = 0;
-        foreach ($this->nonTerminalsList as $nonTerminalClassName) {
+        foreach (self::NON_TERMINALS_LIST as $nonTerminalClassName) {
             foreach ($nonTerminalClassName::RULES as $RULE_ITEMS) {
                 $grammarRule = new GrammarRule($nonTerminalClassName, $RULE_ITEMS, $grammarRuleIndex);
                 $this->grammarRulesList[] = $grammarRule;
@@ -67,7 +77,7 @@ class ParserCompiler
         $this->finiteStateMachine->setGrammarRulesList($this->grammarRulesList);
 
         // building auxiliary table with first terminals foreach non-terminal
-        foreach ($this->nonTerminalsList as $nonTerminalClassName) {
+        foreach (self::NON_TERMINALS_LIST as $nonTerminalClassName) {
             $this->transitionTable->pushFirstTerminals(
                 $nonTerminalClassName,
                 $this->findFirstTerminals($nonTerminalClassName)
@@ -75,7 +85,7 @@ class ParserCompiler
         }
 
         // building auxiliary table with following terminals foreach non-terminal
-        foreach ($this->nonTerminalsList as $nonTerminalClassName) {
+        foreach (self::NON_TERMINALS_LIST as $nonTerminalClassName) {
             $this->transitionTable->pushFollowingTerminals(
                 $nonTerminalClassName,
                 $this->findFollowingTerminals($nonTerminalClassName)

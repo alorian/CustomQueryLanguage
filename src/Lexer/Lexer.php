@@ -14,6 +14,7 @@ use App\Lexer\SimpleToken\GreaterToken;
 use App\Lexer\SimpleToken\LessEqualToken;
 use App\Lexer\SimpleToken\LessToken;
 use App\Lexer\SimpleToken\MinusToken;
+use App\Lexer\SimpleToken\NotContainToken;
 use App\Lexer\SimpleToken\NotEqualToken;
 use App\Lexer\TypeToken\EolToken;
 use App\Lexer\TypeToken\NumberToken;
@@ -22,7 +23,7 @@ use App\Lexer\SimpleToken\ParenRightToken;
 use App\Lexer\SimpleToken\PlusToken;
 use App\Lexer\SimpleToken\StarToken;
 use App\Lexer\TypeToken\StringToken;
-use App\Lexer\SimpleToken\TildaToken;
+use App\Lexer\SimpleToken\ContainToken;
 use JetBrains\PhpStorm\Pure;
 
 class Lexer
@@ -110,12 +111,23 @@ class Lexer
                 $this->addToken(StarToken::class);
                 break;
 
-            case TildaToken::LEXEME:
-                $this->addToken(TildaToken::class);
+            case ContainToken::LEXEME:
+                $this->addToken(ContainToken::class);
                 break;
 
             case '!':
-                $this->addToken($this->match('=') ? NotEqualToken::class : NotToken::class);
+                switch ($this->nextSymbol()) {
+                    case '=':
+                        $this->advance();
+                        $this->addToken(NotEqualToken::class);
+                        break;
+                    case '~':
+                        $this->advance();
+                        $this->addToken(NotContainToken::class);
+                        break;
+                    default:
+                        $this->addToken(NotToken::class);
+                }
                 break;
 
             case '<':

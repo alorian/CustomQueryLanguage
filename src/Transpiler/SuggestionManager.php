@@ -23,7 +23,7 @@ use App\Lexer\SimpleToken\ParenLeftToken;
 use App\Lexer\SimpleToken\ParenRightToken;
 use App\Lexer\SimpleToken\PlusToken;
 use App\Lexer\SimpleToken\StarToken;
-use App\Lexer\SimpleToken\TildaToken;
+use App\Lexer\SimpleToken\ContainToken;
 use App\Lexer\TypeToken\EmptyToken;
 use App\Lexer\TypeToken\FalseToken;
 use App\Lexer\TypeToken\NullToken;
@@ -128,7 +128,7 @@ class SuggestionManager
                 //case ParenRightToken::class:
                 case PlusToken::class:
                 case StarToken::class:
-                case TildaToken::class:
+                case ContainToken::class:
                 case EmptyToken::class:
                 case NullToken::class:
                 case FalseToken::class:

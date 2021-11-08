@@ -21,7 +21,7 @@ Lexer receives the raw query and split it into the tokens array:
 Parser receives the tokens array and build the abstract syntax tree (AST):
 * QueryNode
   * ConditionalExpressionNode
-    * ComparisonExpressionNode
+    * AlphanumericComparisonExpressionNode
       * FieldNode
         - StringToken, value - name
       * ComparisonOperatorNode
@@ -34,7 +34,7 @@ The example is simplified. The real AST is slightly more complex.
 ### Transpiler
 Transpiler receives the AST from the parser and build the final SQL query:
 ```sql
-SELECT * FROM projects WHERE name = 'example'
+SELECT * FROM project WHERE name = 'example'
 ```
 
 The results of the query are returned to the user.
@@ -76,7 +76,7 @@ Language implementation.
 
 The parser use a transitions table during the parsing. Each row of
 this table is a parsing state. Each column of the table is a **terminal** (a token from the lexer)
-or a **non-terminal** (ComparisonExpressionNode for example, can consist of other nodes and terminals). 
+or a **non-terminal** (AlphanumericComparisonExpressionNode for example, can consist of other nodes and terminals). 
 So the parser switches between states during the parsing and because of the transitions table knows what to expect
 in the exact state.
 
@@ -237,10 +237,15 @@ conditional_expression | | conditional_term &vert; conditional_expression OR con
 conditional_term | | conditional_factor &vert; conditional_term AND conditional_factor
 conditional_factor | | ( "!" &vert; "NOT" )? conditional_primary
 conditional_primary | | simple_cond_expression &vert; "(" conditional_expression ")"
-simple_cond_expression | | comparison_expression &vert; contains_expression
-comparison_expression | | field comparison_operator primary
-contains_expression | | field contains_operator primary
+simple_cond_expression | | alphanumeric_comparison_expression &vert; date_comparison_expression &vert; in_expression &vert; contains_expression &vert; null_comparison_expression
+alphanumeric_comparison_expression | | field comparison_operator alphanumeric_value
+date_comparison_expression | | field comparison_operator date_value
+in_expression | | field (not)? in "(" comma_separated_sequence ")"
+contains_expression | | field contains_operator alphanumeric_value
+null_comparison_expression | | field "IS" (NOT)? ("null" &vert; "empty") &vert; field ("=" &vert; "!=") ("null" &vert; "empty")
 comparison_operator | | = &vert; != &vert; \> &vert; >= &vert; < &vert; <= &vert; 
-contains_operator | | ~ 
-primary | | NUMBER &vert; "-" NUMBER &vert; STRING &vert; "true" &vert; "false"
+contains_operator | | ~ &vert; !~
+comma_separated_sequence | | alphanumeric_value &vert; comma_separated_sequence "," alphanumeric_value
+alphanumeric_value | | NUMBER &vert; "-" NUMBER &vert; STRING
+date_value | | dateModifierToken
 field | | STRING

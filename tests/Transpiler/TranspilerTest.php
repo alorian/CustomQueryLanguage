@@ -10,29 +10,17 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class TranspilerTest extends KernelTestCase
 {
-    protected static ?Transpiler $transpiler;
-
-    public static function setUpBeforeClass(): void
-    {
-        parent::setUpBeforeClass();
-        self::bootKernel();
-        static::$transpiler = self::getContainer()->get(Transpiler::class);
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        parent::tearDownAfterClass();
-        static::$transpiler = null;
-    }
 
     public function testSimpleString(): void
     {
-        $rawQueryState = new CustomQueryState('name = test', 0);
-        $sqlQueryParts = static::$transpiler->transpile($rawQueryState);
+        $customQueryState = new CustomQueryState('name = test', 0);
+
+        $transpiler = self::getContainer()->get(Transpiler::class);
+        $sqlQueryParts = $transpiler->transpile($customQueryState);
 
         $this->assertIsString($sqlQueryParts);
         $this->assertNotEmpty($sqlQueryParts);
-        $this->assertTrue($rawQueryState->isValid());
+        $this->assertTrue($customQueryState->isValid());
     }
 
     public function wrongQueryProvider(): array
@@ -47,9 +35,10 @@ class TranspilerTest extends KernelTestCase
      */
     public function testTranspilerUnknownFieldException(string $wrongQuery): void
     {
-        $rawQueryState = new CustomQueryState($wrongQuery, 0);
-        static::$transpiler->transpile($rawQueryState);
-        $this->assertFalse($rawQueryState->isValid());
-        $this->assertContainsOnlyInstancesOf(TranspilerUnknownFieldException::class, $rawQueryState->getErrors());
+        $customQueryState = new CustomQueryState($wrongQuery, 0);
+        $transpiler = self::getContainer()->get(Transpiler::class);
+        $transpiler->transpile($customQueryState);
+        $this->assertFalse($customQueryState->isValid());
+        $this->assertContainsOnlyInstancesOf(TranspilerUnknownFieldException::class, $customQueryState->getErrors());
     }
 }

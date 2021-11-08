@@ -21,12 +21,13 @@ use App\Lexer\SimpleToken\GreaterToken;
 use App\Lexer\SimpleToken\LessEqualToken;
 use App\Lexer\SimpleToken\LessToken;
 use App\Lexer\SimpleToken\MinusToken;
+use App\Lexer\SimpleToken\NotContainToken;
 use App\Lexer\SimpleToken\NotEqualToken;
 use App\Lexer\SimpleToken\ParenLeftToken;
 use App\Lexer\SimpleToken\ParenRightToken;
 use App\Lexer\SimpleToken\PlusToken;
 use App\Lexer\SimpleToken\StarToken;
-use App\Lexer\SimpleToken\TildaToken;
+use App\Lexer\SimpleToken\ContainToken;
 use App\Lexer\TypeToken\EmptyToken;
 use App\Lexer\TypeToken\EolToken;
 use App\Lexer\TypeToken\FalseToken;
@@ -127,7 +128,9 @@ class LexerTest extends KernelTestCase
             [ParenRightToken::LEXEME, ParenRightToken::class],
             [PlusToken::LEXEME, PlusToken::class],
             [StarToken::LEXEME, StarToken::class],
-            [TildaToken::LEXEME, TildaToken::class],
+            [ContainToken::LEXEME, ContainToken::class],
+            [NotContainToken::LEXEME, NotContainToken::class],
+            ['!', NotToken::class],
         ];
     }
 

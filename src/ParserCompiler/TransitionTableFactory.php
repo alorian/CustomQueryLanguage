@@ -2,7 +2,7 @@
 
 namespace App\ParserCompiler;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
 class TransitionTableFactory
@@ -15,11 +15,6 @@ class TransitionTableFactory
     {
         return $cache->get('transitions_table', static function () use ($container) {
             $parserCompiler = $container->get(ParserCompiler::class);
-
-            if ($parserCompiler === null) {
-                throw new \RuntimeException('Cannot find parser compiler');
-            }
-
             $parserCompiler->compile();
             return $parserCompiler->getTransitionTable();
         });

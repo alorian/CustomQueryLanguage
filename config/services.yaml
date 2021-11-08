@@ -27,5 +27,9 @@ services:
   App\ParserCompiler\TransitionTable:
     factory: '@App\ParserCompiler\TransitionTableFactory'
 
+  cache.adapter.null:
+    class: Symfony\Component\Cache\Adapter\NullAdapter
+    arguments: [ ~ ] # small trick to avoid arguments errors on compile-time.
+
   # add more service definitions when explicit configuration is needed
   # please note that last definitions always *replace* previous ones

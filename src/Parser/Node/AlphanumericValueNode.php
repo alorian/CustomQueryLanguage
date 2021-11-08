@@ -8,7 +8,7 @@ use App\Lexer\TypeToken\StringToken;
 use App\Lexer\TypeToken\TrueToken;
 use App\Parser\AbstractNode;
 
-class PrimaryNode extends AbstractNode
+class AlphanumericValueNode extends AbstractNode
 {
 
     public const RULES = [
@@ -17,12 +17,6 @@ class PrimaryNode extends AbstractNode
         ],
         [
             StringToken::class,
-        ],
-        [
-            TrueToken::class
-        ],
-        [
-            FalseToken::class
         ]
     ];
 

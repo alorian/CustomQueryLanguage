@@ -6,7 +6,8 @@ use App\Exception\TranspilerUnknownFieldException;
 use App\Lexer\AbstractToken;
 use App\Lexer\SimpleToken\ParenLeftToken;
 use App\Parser\AbstractNode;
-use App\Parser\Node\ComparisonExpressionNode;
+use App\Parser\Node\AlphanumericComparisonExpressionNode;
+use App\Parser\Node\AlphanumericValueNode;
 use App\Parser\Node\ComparisonOperatorNode;
 use App\Parser\Node\ConditionalExpressionNode;
 use App\Parser\Node\ConditionalFactorNode;
@@ -15,7 +16,6 @@ use App\Parser\Node\ConditionalTermNode;
 use App\Parser\Node\ContainsExpressionNode;
 use App\Parser\Node\ContainsOperatorNode;
 use App\Parser\Node\FieldNode;
-use App\Parser\Node\PrimaryNode;
 use App\Parser\Node\QueryNode;
 use App\Parser\Node\SimpleCondExpressionNode;
 use RuntimeException;
@@ -50,11 +50,11 @@ class SqlVisitor implements VisitorInterface
             ConditionalFactorNode::class => $this->visitConditionalFactorNode($node),
             ConditionalPrimaryNode::class => $this->visitConditionalPrimaryNode($node),
             SimpleCondExpressionNode::class => $this->visitSimpleCondExpressionNode($node),
-            ComparisonExpressionNode::class => $this->visitComparisonExpressionNode($node),
+            AlphanumericComparisonExpressionNode::class => $this->visitComparisonExpressionNode($node),
             ComparisonOperatorNode::class => $this->visitComparisonOperatorNode($node),
             ContainsExpressionNode::class => $this->visitContainsExpressionNode($node),
             ContainsOperatorNode::class => $this->visitContainsOperatorNode($node),
-            PrimaryNode::class => $this->visitPrimaryNode($node),
+            AlphanumericValueNode::class => $this->visitAlphaNumericValueNode($node),
             FieldNode::class => $this->visitFieldNode($node),
 
             default => throw new RuntimeException('Unknown node type'),
@@ -178,7 +178,7 @@ class SqlVisitor implements VisitorInterface
         return $node->children[0]::LEXEME;
     }
 
-    protected function visitPrimaryNode(AbstractNode $node): string
+    protected function visitAlphaNumericValueNode(AbstractNode $node): string
     {
         return "'" . $node->children[0]->value . "'";
     }

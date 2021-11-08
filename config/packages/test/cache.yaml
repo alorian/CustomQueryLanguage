@@ -1,0 +1,4 @@
+framework:
+    cache:
+        app: cache.adapter.null
+        system: cache.adapter.null

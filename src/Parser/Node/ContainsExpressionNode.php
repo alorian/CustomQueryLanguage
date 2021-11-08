@@ -11,7 +11,7 @@ class ContainsExpressionNode extends AbstractNode
         [
             FieldNode::class,
             ContainsOperatorNode::class,
-            PrimaryNode::class
+            AlphanumericValueNode::class
         ]
     ];
 
