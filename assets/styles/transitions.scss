@@ -1,0 +1,27 @@
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .2s ease-in-out, transform 0.2s ease;
+}
+
+.fade-enter-active {
+  transition-delay: 0.2s;
+}
+
+.fade-enter {
+  opacity: 0;
+  transform: translateY(-100px);
+}
+
+.fade-enter-to {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+.fade-leave {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(100px);
+}

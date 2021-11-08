@@ -1,6 +1,5 @@
 <template>
-  <div class="py-3">
-    <h2 class="mb-5">Projects list ({{ projectsList.length }}):</h2>
+  <div>
     <template v-if="projectsList.length > 0">
       <table class="table table-striped table-hover table-sm">
         <thead>

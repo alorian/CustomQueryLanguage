@@ -61,12 +61,11 @@
       </div>
     </div>
 
-    <template v-if="projectsLoading">
-      <img src="./images/preloader.gif" alt="Loading" />
-    </template>
-    <template v-else>
-      <ProjectsList :projects-list="projectsList"></ProjectsList>
-    </template>
+    <h2 class="mt-3 mb-4">Projects list ({{ projectsCountAnimated }}):</h2>
+
+    <transition name="fade">
+      <ProjectsList :projects-list="projectsList" v-if="!projectsLoading"></ProjectsList>
+    </transition>
 
   </div>
 </template>
@@ -80,6 +79,7 @@ import Project from "./interfaces/Project";
 import QueryState from "./interfaces/QueryState"
 import { debounce } from "lodash";
 import Api from "./Api"
+import gsap from "gsap";
 
 @Component({
   components: {
@@ -101,6 +101,12 @@ export default class App extends Vue {
   }
 
   projectsLoading = true
+
+  projectsCountPrev = 0;
+
+  get projectsCountAnimated() {
+    return this.projectsCountPrev.toFixed(0);
+  }
 
   showErrors = false
 
@@ -160,6 +166,7 @@ export default class App extends Vue {
   }
 
   async fetchProjects() {
+    this.queryState.errorsList = []
     this.showErrors = true
     this.projectsLoading = true
     try {
@@ -167,14 +174,17 @@ export default class App extends Vue {
       this.queryState.valid = fetchResponse.data.queryState.valid
       this.queryState.suggestionsList = fetchResponse.data.queryState.suggestionsList
       this.queryState.errorsList = fetchResponse.data.queryState.errorsList
-      if (this.queryState.valid) {
-        this.projectsList = fetchResponse.data.projectsList
-      }
+      this.projectsList = fetchResponse.data.projectsList
+
+      // animation projects number
+      gsap.to(this.$data, { duration: 0.5, projectsCountPrev: this.projectsList.length });
     } catch (e: any) {
       this.queryState.valid = false;
       this.queryState.errorsList = [e.message]
     }
-    this.projectsLoading = false
+    setTimeout(() => {
+      this.projectsLoading = false
+    }, 50)
   }
 
   highlightSuggestion(suggestion: { label: string, value: string }) {
