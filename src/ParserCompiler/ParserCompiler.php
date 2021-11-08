@@ -18,7 +18,7 @@ use App\Parser\Node\ConditionalPrimaryNode;
 use App\Parser\Node\ConditionalTermNode;
 use App\Parser\Node\ContainsExpressionNode;
 use App\Parser\Node\ContainsOperatorNode;
-use App\Parser\Node\DateValue;
+use App\Parser\Node\DateValueNode;
 use App\Parser\Node\FieldNode;
 use App\Parser\Node\InExpressionNode;
 use App\Parser\Node\NullComparisonExpressionNode;
@@ -49,7 +49,7 @@ class ParserCompiler
         CommaSeparatedSequenceNode::class,
         FieldNode::class,
         AlphanumericValueNode::class,
-        DateValue::class
+        DateValueNode::class
     ];
 
     /** @var array|GrammarRule[] */

@@ -12,13 +12,13 @@ class DateComparisonExpression extends AbstractNode
         [
             FieldNode::class,
             ComparisonOperatorNode::class,
-            DateValue::class
+            DateValueNode::class
         ],
         [
             FieldNode::class,
             ComparisonOperatorNode::class,
             MinusToken::class,
-            DateValue::class
+            DateValueNode::class
         ]
     ];
 

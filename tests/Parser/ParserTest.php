@@ -34,7 +34,7 @@ use App\Parser\Node\ConditionalTermNode;
 use App\Parser\Node\ContainsExpressionNode;
 use App\Parser\Node\ContainsOperatorNode;
 use App\Parser\Node\DateComparisonExpression;
-use App\Parser\Node\DateValue;
+use App\Parser\Node\DateValueNode;
 use App\Parser\Node\FieldNode;
 use App\Parser\Node\InExpressionNode;
 use App\Parser\Node\NullComparisonExpressionNode;
@@ -295,7 +295,7 @@ class ParserTest extends KernelTestCase
         $this->assertInstanceOf(DateComparisonExpression::class, $node);
         $this->assertInstanceOf(FieldNode::class, $node->children[0]);
         $this->assertInstanceOf(ComparisonOperatorNode::class, $node->children[1]);
-        $this->assertInstanceOf(DateValue::class, $node->children[2]);
+        $this->assertInstanceOf(DateValueNode::class, $node->children[2]);
     }
 
     public function testInExpression(): void

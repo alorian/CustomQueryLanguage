@@ -28,8 +28,8 @@ class SuggestionManagerTest extends KernelTestCase
     public function simpleQueryProvider(): array
     {
         return [
-            ['name = test', 2],
-            ['name ', 5],
+            ['name = test', 2],//field suggestions
+            ['name ', 5],// token after field suggestion
         ];
     }
 
@@ -55,7 +55,6 @@ class SuggestionManagerTest extends KernelTestCase
         $rawQuery = '"asd ';
         $queryState = new CustomQueryState($rawQuery, 5);
         static::$suggestionManager->addSuggestions($queryState);
-
         $this->assertEmpty($queryState->suggestionsList);
     }
 
