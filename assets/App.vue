@@ -61,7 +61,12 @@
       </div>
     </div>
 
-    <ProjectsList :projects-list="projectsList"></ProjectsList>
+    <template v-if="projectsLoading">
+      <img src="./images/preloader.gif" alt="Loading" />
+    </template>
+    <template v-else>
+      <ProjectsList :projects-list="projectsList"></ProjectsList>
+    </template>
 
   </div>
 </template>
@@ -95,9 +100,11 @@ export default class App extends Vue {
     errorsList: []
   }
 
+  projectsLoading = true
+
   showErrors = false
 
-  queryInput = debounce(this.validateQuery, 350)
+  queryInput = debounce(this.validateQuery, 200)
 
   created() {
     this.fetchProjects()
@@ -143,7 +150,9 @@ export default class App extends Vue {
   async validateQuery() {
     try {
       const validationResponse = await Api.validateQuery(this.queryState.query, this.queryState.caretPos)
-      this.queryState = validationResponse.data
+      this.queryState.valid = validationResponse.data.valid
+      this.queryState.suggestionsList = validationResponse.data.suggestionsList
+      this.queryState.errorsList = validationResponse.data.errorsList
     } catch (e: any) {
       this.queryState.valid = false;
       this.queryState.errorsList = [e.message]
@@ -152,9 +161,12 @@ export default class App extends Vue {
 
   async fetchProjects() {
     this.showErrors = true
+    this.projectsLoading = true
     try {
       const fetchResponse = await Api.fetchProjects(this.queryState.query, this.queryState.caretPos)
-      this.queryState = fetchResponse.data.queryState
+      this.queryState.valid = fetchResponse.data.queryState.valid
+      this.queryState.suggestionsList = fetchResponse.data.queryState.suggestionsList
+      this.queryState.errorsList = fetchResponse.data.queryState.errorsList
       if (this.queryState.valid) {
         this.projectsList = fetchResponse.data.projectsList
       }
@@ -162,6 +174,7 @@ export default class App extends Vue {
       this.queryState.valid = false;
       this.queryState.errorsList = [e.message]
     }
+    this.projectsLoading = false
   }
 
   highlightSuggestion(suggestion: { label: string, value: string }) {
